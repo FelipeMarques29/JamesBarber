@@ -1,10 +1,10 @@
 import { CommonModule } from '@angular/common'; // Para diretivas como *ngIf ou *ngFor
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms'; // OBRIGATÓRIO para usar o [(ngModel)]
 import { Router } from '@angular/router';
 
-import { ApiService } from '../../../services/api-service';
-import { CadastroCliente } from '../../../models/cliente.model';
+import { ApiService } from '@core/api-service';
+import { CadastroCliente } from '@shared/models/cliente.model';
 
 @Component({
   selector: 'app-cadastro',
@@ -26,17 +26,15 @@ export class Cadastro {
     cliente_senha: ''
   };
 
-  constructor(
-    private router: Router,
-    private ApiService: ApiService
-  ) {}
+  private apiService = inject(ApiService);
+  private router = inject(Router);
 
   cadastrar() {
     // Aqui você chamaria o seu AuthService para enviar ao FastAPI
     console.log('Enviando para o Firebase via FastAPI:', this.novoCliente);
 
 // 3. Chamada REAL para o serviço
-    this.ApiService.criarCliente(this.novoCliente).subscribe({
+    this.apiService.criarCliente(this.novoCliente).subscribe({
       next: (res) => {
         console.log('Sucesso:', res);
         alert('Cadastro realizado com sucesso!');

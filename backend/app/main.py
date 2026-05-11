@@ -1,6 +1,9 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routers import agendamentos, clientes, funcionarios, servicos
+from app.routers import servicos
+from app.routers import agendamentos
+from app.routers import clientes
+from app.routers import funcionarios
 
 
 app = FastAPI(title="JamesBarber API")

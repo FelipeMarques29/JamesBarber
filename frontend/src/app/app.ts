@@ -1,9 +1,9 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Inject } from '@angular/core';
 import { RouterOutlet, provideRouter } from '@angular/router';
 
 import { routes } from './app.routes';
-import { ApiService } from './services/api-service';
+import { ApiService } from '@core/api-service';
 
 @Component({
   selector: 'app-root',
@@ -16,7 +16,7 @@ import { ApiService } from './services/api-service';
 export class AppComponent implements OnInit {
   title = 'JamesBarber';
 
-  constructor(private apiService: ApiService) {}
+  private apiService = Inject(ApiService);
 
 
   ngOnInit() {
