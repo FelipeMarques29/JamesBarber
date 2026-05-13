@@ -8,7 +8,7 @@ import { Funcionarios } from './features/funcionarios/funcionarios';
 import { Servicos } from './features/servicos/servicos';
 
 export const routes: Routes = [
-  { path: '', redirectTo: 'home', pathMatch: 'full' },
+  { path: '', component: Login },
   { path: 'login', component: Login },
   { path: 'cadastro', component: Cadastro },
   { path: 'home', component: Home },
@@ -16,5 +16,5 @@ export const routes: Routes = [
   { path: 'clientes', component: Clientes },
   { path: 'funcionarios', component: Funcionarios },
   { path: 'servicos', component: Servicos },
-  { path: '**', redirectTo: 'home' }
+  { path: '**', redirectTo: '' }
 ];
