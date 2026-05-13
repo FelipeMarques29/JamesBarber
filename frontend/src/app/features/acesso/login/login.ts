@@ -31,8 +31,8 @@ export class Login {
       // Chamando o seu serviço (ajuste o nome do método se necessário)
       this.apiService.login(this.usuario).subscribe({
         next: (res) => {
-          alert('Bem-vindo ao JamesBarber!');
-          this.router.navigate(['/home']); // ✅
+          // alert('Bem-vindo ao JamesBarber!');
+          this.router.navigate(['/home']);
           // Aqui você usaria o Router para ir para a tela de agenda
         },
         error: (err) => alert('E-mail ou senha incorretos.')

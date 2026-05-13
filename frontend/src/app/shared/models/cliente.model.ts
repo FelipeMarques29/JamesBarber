@@ -12,6 +12,7 @@ export interface ClienteLogin {
   cliente_senha: string;
 }
 
+// Tem tudo do ClienteLogin mais o que está abaixo
 export interface CadastroCliente extends ClienteLogin {
   cliente_nome: string;
   cliente_telefone: string;

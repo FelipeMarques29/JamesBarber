@@ -1,1 +1,45 @@
-<p>navbar works!</p>
+<!-- <p>navbar works!</p> -->
+
+<nav class="navbar">
+  <a class="navbar-brand" routerLink="/home">
+    <div class="brand-icon">
+      <i class="ti ti-scissors"></i>
+    </div>
+    <div class="brand-name">
+      <span>JamesBlack</span>
+      <span>Barbearia</span>
+    </div>
+  </a>
+
+  <ul class="navbar-links">
+    <li><a routerLink="/home" routerLinkActive="active">
+      <i class="ti ti-home"></i> Home
+    </a></li>
+    <li><a routerLink="/agendamentos" routerLinkActive="active">
+      <i class="ti ti-calendar"></i> Agendamentos
+    </a></li>
+    <li><a routerLink="/clientes" routerLinkActive="active">
+      <i class="ti ti-users"></i> Clientes
+    </a></li>
+    <li><a routerLink="/funcionarios" routerLinkActive="active">
+      <i class="ti ti-user-cog"></i> Barbeiros
+    </a></li>
+    <li><a routerLink="/servicos" routerLinkActive="active">
+      <i class="ti ti-scissors"></i> Serviços
+    </a></li>
+  </ul>
+
+  <div class="navbar-user">
+    <div class="user-info">
+      <div class="avatar">JB</div>
+      <div>
+        <p class="user-name">James Black</p>
+        <p class="user-role">Administrador</p>
+      </div>
+    </div>
+    <div class="divider-v"></div>
+    <button class="btn-logout" (click)="logout()">
+      <i class="ti ti-logout"></i> Sair
+    </button>
+  </div>
+</nav>
