@@ -1,1 +1,112 @@
-<p>agendamentos works!</p>
+<app-navbar></app-navbar>
+
+<section class="page-hero">
+  <div class="bg-text">AGENDA</div>
+
+  <div class="section-header">
+    <span class="section-label">Gestão de horários</span>
+    <h1 class="section-title">Agendamentos</h1>
+    <div class="gold-line"></div>
+    <p class="section-desc">Crie, confirme e acompanhe os atendimentos da barbearia.</p>
+  </div>
+
+  <div class="layout">
+    <!-- FORM -->
+    <aside class="form-panel">
+      <header class="panel-header">
+        <h2>Novo agendamento</h2>
+        <p>Preencha os campos abaixo para registrar um atendimento.</p>
+      </header>
+
+      <form [formGroup]="form" (ngSubmit)="agendar()" class="form">
+        <label class="field">
+          <span class="field-label">Cliente</span>
+          <input type="text" formControlName="cliente" placeholder="Nome completo">
+        </label>
+
+        <label class="field">
+          <span class="field-label">Serviço</span>
+          <select formControlName="servico">
+            <option value="" disabled>Selecione</option>
+            @for (s of servicos; track s.nome) {
+              <option [value]="s.nome">{{ s.nome }} — R$ {{ s.preco }}</option>
+            }
+          </select>
+        </label>
+
+        <label class="field">
+          <span class="field-label">Barbeiro</span>
+          <select formControlName="barbeiro">
+            <option value="" disabled>Selecione</option>
+            @for (b of barbeiros; track b) {
+              <option [value]="b">{{ b }}</option>
+            }
+          </select>
+        </label>
+
+        <div class="field-row">
+          <label class="field">
+            <span class="field-label">Data</span>
+            <input type="date" formControlName="data">
+          </label>
+          <label class="field">
+            <span class="field-label">Hora</span>
+            <input type="time" formControlName="hora">
+          </label>
+        </div>
+
+        <button type="submit" class="btn-primary">Agendar</button>
+      </form>
+
+      <div class="totalizer">
+        <span class="totalizer-label">Receita prevista</span>
+        <span class="totalizer-value">R$ {{ totalSemana() }}</span>
+      </div>
+    </aside>
+
+    <!-- LISTA -->
+    <div class="list-panel">
+      <header class="panel-header">
+        <h2>Próximos atendimentos</h2>
+        <p>{{ agendamentos().length }} agendamento(s) registrado(s).</p>
+      </header>
+
+      @if (agendamentos().length === 0) {
+        <div class="empty">Nenhum agendamento cadastrado.</div>
+      }
+
+      <div class="appointments">
+        @for (a of agendamentos(); track a.id; let i = $index) {
+          <article class="appointment" [style.--delay]="(i * 0.05) + 's'" [class.is-done]="a.status === 'concluido'">
+            <div class="appointment-time">
+              <span class="time-hour">{{ a.hora }}</span>
+              <span class="time-date">{{ formatarData(a.data) }}</span>
+            </div>
+            <div class="appointment-info">
+              <h3>{{ a.servico }}</h3>
+              <p>
+                <span class="label">Cliente:</span> {{ a.cliente }}
+                <span class="dot"></span>
+                <span class="label">Barbeiro:</span> {{ a.barbeiro }}
+              </p>
+            </div>
+            <div class="appointment-side">
+              <span class="badge" [class.confirmado]="a.status === 'confirmado'"
+                                  [class.pendente]="a.status === 'pendente'"
+                                  [class.concluido]="a.status === 'concluido'">
+                {{ a.status }}
+              </span>
+              <span class="appointment-price">R$ {{ a.preco }}</span>
+              <div class="appointment-actions">
+                @if (a.status === 'pendente') {
+                  <button type="button" class="btn-mini btn-confirm" (click)="confirmar(a.id)">Confirmar</button>
+                }
+                <button type="button" class="btn-mini btn-cancel" (click)="cancelar(a.id)">Excluir</button>
+              </div>
+            </div>
+          </article>
+        }
+      </div>
+    </div>
+  </div>
+</section>

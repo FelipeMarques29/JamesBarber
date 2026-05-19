@@ -1,9 +1,10 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+
 from app.routers import servicos
 from app.routers import agendamentos
 from app.routers import clientes
-from app.routers import funcionarios
+from app.routers import auth
 
 
 app = FastAPI(title="JamesBarber API")
@@ -19,8 +20,8 @@ app.add_middleware(
 
 app.include_router(agendamentos.router)
 app.include_router(clientes.router)
-app.include_router(funcionarios.router)
 app.include_router(servicos.router)
+app.include_router(auth.router)
 
 @app.get("/")
 def home():

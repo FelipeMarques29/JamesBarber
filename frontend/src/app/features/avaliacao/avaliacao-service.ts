@@ -7,7 +7,8 @@ import { Observable } from 'rxjs';
 })
 export class Cliente {
   // Ajuste esta URL para a porta que seu FastAPI está rodando (ex: 8000)
-  private apiUrl = 'http://localhost:8000/clientes';
+  // private apiUrl = 'http://localhost:8000/clientes';
+  private apiUrl = 'http://192.168.15.2:8000/clientes';
 
   constructor(private http: HttpClient) { }
 

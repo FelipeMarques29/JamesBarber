@@ -1,9 +1,9 @@
-<!-- <p>navbar works!</p> -->
-
 <nav class="navbar">
+
+  <!-- BRAND -->
   <a class="navbar-brand" routerLink="/home">
     <div class="brand-icon">
-      <i class="ti ti-scissors"></i>
+      <img src="/icons/scissors-solid-white.svg" alt="" width="22" height="22" class="brand-icon-img">
     </div>
     <div class="brand-name">
       <span>JamesBlack</span>
@@ -11,35 +11,47 @@
     </div>
   </a>
 
-  <ul class="navbar-links">
-    <li><a routerLink="/home" routerLinkActive="active">
+  <!-- LINKS (desktop + dropdown mobile) -->
+  <ul class="navbar-links" [class.aberto]="menuAberto">
+    <li><a routerLink="/home" routerLinkActive="active" (click)="fecharMenu()">
       <i class="ti ti-home"></i> Home
     </a></li>
-    <li><a routerLink="/agendamentos" routerLinkActive="active">
+    <li><a routerLink="/agendamentos" routerLinkActive="active" (click)="fecharMenu()">
       <i class="ti ti-calendar"></i> Agendamentos
     </a></li>
-    <li><a routerLink="/clientes" routerLinkActive="active">
-      <i class="ti ti-users"></i> Clientes
-    </a></li>
-    <li><a routerLink="/funcionarios" routerLinkActive="active">
-      <i class="ti ti-user-cog"></i> Barbeiros
-    </a></li>
-    <li><a routerLink="/servicos" routerLinkActive="active">
+    <li><a routerLink="/servicos" routerLinkActive="active" (click)="fecharMenu()">
       <i class="ti ti-scissors"></i> Serviços
     </a></li>
+    <li><a routerLink="/avaliacao" routerLinkActive="active" (click)="fecharMenu()">
+      <i class="ti ti-users"></i> Avaliações
+    </a></li>
+    <li><a routerLink="/funcionarios" routerLinkActive="active" (click)="fecharMenu()">
+      <i class="ti ti-user-cog"></i> Barbeiros
+    </a></li>
+    @if (apiService.isAdmin()) {
+      <li><a routerLink="/dashboard" routerLinkActive="active" (click)="fecharMenu()">
+        <i class="ti ti-layout-dashboard"></i> Dashboard
+      </a></li>
+    }
   </ul>
 
+  <!-- DIREITA — sempre visível -->
   <div class="navbar-user">
     <div class="user-info">
-      <div class="avatar">JB</div>
-      <div>
-        <p class="user-name">James Black</p>
-        <p class="user-role">Administrador</p>
-      </div>
+      <div class="avatar">{{ iniciaisUsuario }}</div>
+      <p class="user-name">{{ nomeUsuario }}</p>  <!-- some no mobile via CSS -->
     </div>
     <div class="divider-v"></div>
     <button class="btn-logout" (click)="logout()">
-      <i class="ti ti-logout"></i> Sair
+      <i class="ti ti-logout"></i>
+      <span class="logout-text">Sair</span>  <!-- texto some no mobile, ícone fica -->
+    </button>
+    <!-- hamburguer fica aqui, do lado do sair -->
+    <button class="btn-hamburger" (click)="toggleMenu()" [class.aberto]="menuAberto">
+      <span></span>
+      <span></span>
+      <span></span>
     </button>
   </div>
+
 </nav>

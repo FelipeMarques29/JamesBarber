@@ -1,0 +1,479 @@
+/* =====================================================
+   CLIENTES.CSS
+   Reset, variáveis, body, fadeUp → vêm do styles.css (global)
+   Tudo abaixo é exclusivo desta página
+===================================================== */
+
+/* ── Encapsulamento do componente ── */
+:host {
+  display: block;
+  min-height: 100vh;
+  /* background e color → herdados do body global */
+}
+
+/* =====================================================
+   PAGE HERO
+===================================================== */
+.page-hero {
+  position: relative;
+  padding: 5rem 3rem 6rem;
+  overflow: hidden;
+  /* background → var(--black) herdado do body global */
+}
+
+/* gradiente decorativo — específico desta página */
+.page-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 55% 60% at 90% 10%, rgba(201, 168, 76, 0.06) 0%, transparent 65%),
+    radial-gradient(ellipse 40% 50% at 5%  80%, rgba(201, 168, 76, 0.04) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+/* texto gigante decorativo — específico desta página */
+.bg-text {
+  position: absolute;
+  top: 8%;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(7rem, 18vw, 20rem);
+  font-weight: 900;
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(201, 168, 76, 0.05);
+  user-select: none;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+/* =====================================================
+   SECTION HEADER
+===================================================== */
+.section-header {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  margin-bottom: 4rem;
+  animation: fadeUp 0.8s ease both; /* fadeUp → global */
+}
+
+.section-label {
+  display: block;
+  font-size: 0.7rem;
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  color: var(--gold); /* var(--gold) → global */
+  margin-bottom: 0.8rem;
+}
+
+.section-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  font-weight: 700;
+  color: var(--white); /* var(--white) → global */
+  margin: 0 0 1.2rem;
+}
+
+.gold-line {
+  width: 60px;
+  height: 2px;
+  background: var(--gold); /* var(--gold) → global */
+  margin: 0 auto 2.5rem;
+}
+
+/* ── Rating summary ── */
+.rating-summary {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.8rem;
+}
+
+.rating-big {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.rating-value {
+  font-family: 'Playfair Display', serif;
+  font-size: 4rem;
+  font-weight: 700;
+  color: var(--gold); /* var(--gold) → global */
+  line-height: 1;
+}
+
+.rating-stars {
+  display: flex;
+  gap: 4px;
+}
+
+.rating-count {
+  font-size: 0.75rem;
+  letter-spacing: 0.15em;
+  color: var(--text-muted); /* var(--text-muted) → global */
+  text-transform: uppercase;
+}
+
+/* ── Estrelas SVG ── */
+.star {
+  width: 20px;
+  height: 20px;
+}
+
+.star.full polygon {
+  fill: var(--gold); /* var(--gold) → global */
+  stroke: var(--gold);
+  stroke-width: 1;
+}
+
+.star.empty polygon {
+  fill: transparent;
+  stroke: rgba(201, 168, 76, 0.3);
+  stroke-width: 1;
+}
+
+/* ── Botão primário ── */
+.btn-primary {
+  background: var(--gold); /* var(--gold) → global */
+  color: var(--black); /* var(--black) → global */
+  border: none;
+  padding: 0.85rem 2rem;
+  font-family: inherit; /* font-family → herdado do body global */
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  cursor: pointer;
+  border-radius: 2px;
+  transition: background 0.25s, transform 0.25s, box-shadow 0.25s;
+}
+
+.btn-primary:hover {
+  background: var(--gold-light); /* var(--gold-light) → global */
+  transform: translateY(-2px);
+  box-shadow: 0 0 24px rgba(201, 168, 76, 0.35);
+}
+
+/* =====================================================
+   REVIEWS GRID
+===================================================== */
+.reviews-grid {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.4rem;
+  max-width: 1240px;
+  margin: 0 auto;
+}
+
+/* ── Card de review ── */
+.review-card {
+  background: linear-gradient(180deg, rgba(201, 168, 76, 0.03) 0%, transparent 40%), var(--dark2); /* var(--dark2) → global */
+  border: 1px solid rgba(201, 168, 76, 0.1);
+  border-radius: 4px;
+  padding: 1.6rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  transition: border-color 0.3s, transform 0.3s, box-shadow 0.3s;
+  animation: fadeUp 0.6s ease both; /* fadeUp → global */
+  animation-delay: var(--delay, 0s);
+}
+
+.review-card:hover {
+  border-color: rgba(201, 168, 76, 0.3);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.4);
+}
+
+/* ── Header do card ── */
+.review-head {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+}
+
+.avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid rgba(201, 168, 76, 0.2);
+  flex-shrink: 0;
+}
+
+.autor-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  flex: 1;
+}
+
+.autor-nome {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--white); /* var(--white) → global */
+}
+
+.autor-data {
+  font-size: 0.7rem;
+  color: var(--text-muted); /* var(--text-muted) → global */
+  letter-spacing: 0.05em;
+}
+
+/* ── Estrelas do card ── */
+.card-stars {
+  display: flex;
+  gap: 3px;
+  margin-left: auto;
+}
+
+.card-stars .star {
+  width: 14px;
+  height: 14px;
+}
+
+/* ── Conteúdo do card ── */
+.review-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--white); /* var(--white) → global */
+  margin: 0;
+}
+
+.review-desc {
+  font-size: 0.85rem;
+  color: var(--text-muted); /* var(--text-muted) → global */
+  line-height: 1.7;
+  margin: 0;
+}
+
+/* =====================================================
+   MODAL
+===================================================== */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 1rem;
+  animation: fadeUp 0.25s ease both; /* fadeUp → global */
+}
+
+.modal {
+  background: var(--dark2); /* var(--dark2) → global */
+  border: 1px solid rgba(201, 168, 76, 0.2);
+  border-radius: 6px;
+  width: 100%;
+  max-width: 520px;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* ── Header do modal ── */
+.modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.modal-head h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--white); /* var(--white) → global */
+  margin: 0;
+}
+
+.btn-close {
+  background: transparent;
+  border: none;
+  color: var(--text-muted); /* var(--text-muted) → global */
+  font-size: 1.6rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 0.3rem;
+  transition: color 0.2s;
+}
+
+.btn-close:hover {
+  color: var(--white); /* var(--white) → global */
+}
+
+/* ── Formulário do modal ── */
+.modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.field-label {
+  font-size: 0.65rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gold); /* var(--gold) → global */
+  font-weight: 600;
+}
+
+.field input,
+.field textarea {
+  width: 100%;
+  background: var(--dark); /* var(--dark) → global */
+  border: 1px solid rgba(201, 168, 76, 0.18);
+  color: var(--white); /* var(--white) → global */
+  padding: 0.7rem 0.9rem;
+  border-radius: 3px;
+  font-family: inherit; /* font-family → herdado do body global */
+  font-size: 0.9rem;
+  transition: border-color 0.25s, box-shadow 0.25s;
+  resize: none;
+}
+
+.field input:focus,
+.field textarea:focus {
+  outline: none;
+  border-color: var(--gold); /* var(--gold) → global */
+  box-shadow: 0 0 0 3px rgba(201, 168, 76, 0.12);
+}
+
+.field input::placeholder,
+.field textarea::placeholder {
+  color: #555;
+}
+
+.error {
+  font-size: 0.72rem;
+  color: #e58484;
+  letter-spacing: 0.03em;
+}
+
+/* ── Rating input ── */
+.rating-field {
+  gap: 0.6rem;
+}
+
+.rating-input {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.star-wrap {
+  position: relative;
+  width: 32px;
+  height: 32px;
+}
+
+.star-visual {
+  width: 32px;
+  height: 32px;
+  pointer-events: none;
+}
+
+.star-visual.full polygon {
+  fill: var(--gold); /* var(--gold) → global */
+  stroke: var(--gold);
+  stroke-width: 1;
+}
+
+.star-visual.empty polygon {
+  fill: transparent;
+  stroke: rgba(201, 168, 76, 0.3);
+  stroke-width: 1;
+}
+
+/* botões invisíveis de meia estrela */
+.star-half-btn {
+  position: absolute;
+  top: 0;
+  width: 50%;
+  height: 100%;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  z-index: 1;
+}
+
+.star-half-btn.left  { left: 0; }
+.star-half-btn.right { right: 0; }
+
+.rating-text {
+  font-size: 0.8rem;
+  color: var(--text-muted); /* var(--text-muted) → global */
+  margin-left: 0.5rem;
+}
+
+/* ── Ações do modal ── */
+.modal-actions {
+  display: flex;
+  gap: 0.8rem;
+  justify-content: flex-end;
+  margin-top: 0.5rem;
+}
+
+.btn-ghost {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: var(--text-muted); /* var(--text-muted) → global */
+  font-family: inherit;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  padding: 0.75rem 1.4rem;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-ghost:hover {
+  border-color: rgba(255, 255, 255, 0.25);
+  color: var(--white); /* var(--white) → global */
+}
+
+/* =====================================================
+   RESPONSIVO
+===================================================== */
+@media (max-width: 768px) {
+  .page-hero {
+    padding: 3.5rem 1.2rem 4rem;
+  }
+
+  .reviews-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .modal {
+    padding: 1.5rem;
+  }
+
+  .modal-actions {
+    flex-direction: column;
+  }
+
+  .modal-actions button {
+    width: 100%;
+  }
+}

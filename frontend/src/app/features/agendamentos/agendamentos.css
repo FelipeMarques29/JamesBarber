@@ -1,0 +1,460 @@
+/* =====================================================
+   AGENDAMENTOS.CSS
+   Variáveis, reset, body, fadeUp → vêm do styles.css (global)
+   Tudo abaixo é exclusivo desta página
+===================================================== */
+
+/* ── Encapsulamento do componente ── */
+:host {
+  display: block;
+  min-height: 100vh;
+  /* background e color → herdados do body global */
+}
+
+/* =====================================================
+   PAGE HERO
+===================================================== */
+.page-hero {
+  position: relative;
+  padding: 5rem 3rem 6rem;
+  /* background → var(--black) herdado do body global */
+  overflow: hidden;
+}
+
+/* gradiente decorativo de fundo — específico desta página */
+.page-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 50% 50% at 80% 20%, rgba(201, 168, 76, 0.06) 0%, transparent 70%),
+    radial-gradient(ellipse 40% 80% at 10% 70%, rgba(201, 168, 76, 0.04) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+/* texto gigante decorativo — específico desta página */
+.bg-text {
+  position: absolute;
+  top: 12%;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(8rem, 20vw, 22rem);
+  font-weight: 900;
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(201, 168, 76, 0.06);
+  user-select: none;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+/* =====================================================
+   SECTION HEADER  (padrão reutilizável, mas definido aqui)
+   → pode ser movido para global se outras páginas usarem
+===================================================== */
+.section-header {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  margin-bottom: 3.5rem;
+  animation: fadeUp 0.8s ease both; /* fadeUp → global */
+}
+
+.section-label {
+  display: block;
+  font-size: 0.7rem;
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  color: var(--gold); /* var(--gold) → global */
+  margin-bottom: 0.8rem;
+}
+
+.section-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  font-weight: 700;
+  color: var(--white); /* var(--white) → global */
+  margin: 0 0 1.2rem;
+}
+
+.gold-line {
+  width: 60px;
+  height: 2px;
+  background: var(--gold); /* var(--gold) → global */
+  margin: 0 auto 1.5rem;
+}
+
+.section-desc {
+  max-width: 540px;
+  margin: 0 auto;
+  font-size: 0.95rem;
+  color: var(--text-muted); /* var(--text-muted) → global */
+  line-height: 1.7;
+}
+
+/* =====================================================
+   LAYOUT GRID
+===================================================== */
+.layout {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: minmax(340px, 380px) 1fr;
+  gap: 2rem;
+  max-width: 1240px;
+  margin: 0 auto;
+  align-items: start;
+}
+
+/* =====================================================
+   PANEL HEADER
+===================================================== */
+.panel-header h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--white); /* var(--white) → global */
+  margin: 0 0 0.3rem;
+}
+
+.panel-header p {
+  font-size: 0.8rem;
+  color: var(--text-muted); /* var(--text-muted) → global */
+  margin: 0 0 1.8rem;
+}
+
+/* =====================================================
+   FORM PANEL
+===================================================== */
+.form-panel {
+  background: linear-gradient(180deg, rgba(201, 168, 76, 0.03) 0%, transparent 40%), var(--dark2); /* var(--dark2) → global */
+  border: 1px solid rgba(201, 168, 76, 0.12);
+  border-radius: 4px;
+  padding: 2rem 1.8rem;
+  position: sticky;
+  top: 1.5rem;
+  animation: fadeUp 0.7s ease both; /* fadeUp → global */
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.field-label {
+  font-size: 0.65rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gold); /* var(--gold) → global */
+  font-weight: 600;
+}
+
+.field input,
+.field select {
+  width: 100%;
+  background: var(--dark); /* var(--dark) → global */
+  border: 1px solid rgba(201, 168, 76, 0.18);
+  color: var(--white); /* var(--white) → global */
+  padding: 0.7rem 0.9rem;
+  border-radius: 3px;
+  font-family: inherit; /* font-family → herdado do body global */
+  font-size: 0.9rem;
+  transition: border-color 0.25s, box-shadow 0.25s;
+}
+
+.field input:focus,
+.field select:focus {
+  outline: none;
+  border-color: var(--gold); /* var(--gold) → global */
+  box-shadow: 0 0 0 3px rgba(201, 168, 76, 0.12);
+}
+
+.field input::placeholder {
+  color: #555;
+}
+
+/* opções do select herdam o background da página */
+.field select option {
+  background: var(--dark2); /* var(--dark2) → global */
+}
+
+.field-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+/* ── Botão primário ── */
+.btn-primary {
+  margin-top: 0.5rem;
+  background: var(--gold); /* var(--gold) → global */
+  color: var(--black); /* var(--black) → global */
+  border: none;
+  padding: 0.85rem 1.4rem;
+  font-family: inherit;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  cursor: pointer;
+  border-radius: 2px;
+  transition: transform 0.25s, box-shadow 0.25s, background 0.25s;
+}
+
+.btn-primary:hover {
+  background: var(--gold-light); /* var(--gold-light) → global */
+  box-shadow: 0 0 22px rgba(201, 168, 76, 0.35);
+  transform: translateY(-1px);
+}
+
+/* ── Totalizador ── */
+.totalizer {
+  margin-top: 1.8rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(201, 168, 76, 0.12);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.totalizer-label {
+  font-size: 0.65rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--text-muted); /* var(--text-muted) → global */
+}
+
+.totalizer-value {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--gold); /* var(--gold) → global */
+}
+
+/* =====================================================
+   LIST PANEL
+===================================================== */
+.list-panel {
+  display: flex;
+  flex-direction: column;
+  animation: fadeUp 0.85s ease both; /* fadeUp → global */
+}
+
+.empty {
+  padding: 3rem;
+  text-align: center;
+  color: #555;
+  border: 1px dashed rgba(201, 168, 76, 0.15);
+  border-radius: 4px;
+}
+
+.appointments {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+/* ── Card de agendamento ── */
+.appointment {
+  display: grid;
+  grid-template-columns: 130px 1fr auto;
+  gap: 1.5rem;
+  align-items: center;
+  background: linear-gradient(180deg, rgba(201, 168, 76, 0.03) 0%, transparent 40%), var(--dark2); /* var(--dark2) → global */
+  border: 1px solid rgba(201, 168, 76, 0.1);
+  border-radius: 4px;
+  padding: 1.2rem 1.5rem;
+  transition: border-color 0.3s, transform 0.3s, box-shadow 0.3s;
+  animation: fadeUp 0.6s ease both; /* fadeUp → global */
+  animation-delay: var(--delay, 0s);
+}
+
+.appointment:hover {
+  border-color: rgba(201, 168, 76, 0.3);
+  transform: translateX(4px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+
+.appointment.is-done {
+  opacity: 0.55;
+}
+
+/* ── Coluna de horário ── */
+.appointment-time {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.25rem;
+  border-right: 1px solid rgba(201, 168, 76, 0.12);
+  padding-right: 1.2rem;
+}
+
+.time-hour {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.7rem;
+  font-weight: 700;
+  color: var(--gold); /* var(--gold) → global */
+  line-height: 1;
+}
+
+.time-date {
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  color: var(--text-muted); /* var(--text-muted) → global */
+}
+
+/* ── Informações ── */
+.appointment-info h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--white); /* var(--white) → global */
+  margin: 0 0 0.4rem;
+}
+
+.appointment-info p {
+  font-size: 0.82rem;
+  color: #aaa;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.appointment-info .label {
+  color: var(--gold); /* var(--gold) → global */
+  font-size: 0.65rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  margin-right: 0.2rem;
+}
+
+.dot {
+  width: 3px;
+  height: 3px;
+  background: rgba(201, 168, 76, 0.3);
+  border-radius: 50%;
+  margin: 0 0.3rem;
+}
+
+/* ── Lado direito do card ── */
+.appointment-side {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.5rem;
+}
+
+/* ── Badges de status ── */
+.badge {
+  font-size: 0.6rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  padding: 0.3rem 0.7rem;
+  border-radius: 2px;
+  font-weight: 600;
+}
+
+.badge.confirmado {
+  background: rgba(94, 207, 116, 0.12);
+  color: #6fdb91;
+  border: 1px solid rgba(94, 207, 116, 0.3);
+}
+
+.badge.pendente {
+  background: rgba(201, 168, 76, 0.12);
+  color: var(--gold-light); /* var(--gold-light) → global */
+  border: 1px solid rgba(201, 168, 76, 0.3);
+}
+
+.badge.concluido {
+  background: rgba(150, 150, 150, 0.12);
+  color: #aaa;
+  border: 1px solid rgba(150, 150, 150, 0.3);
+}
+
+.appointment-price {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--white); /* var(--white) → global */
+  line-height: 1;
+}
+
+/* ── Botões de ação ── */
+.appointment-actions {
+  display: flex;
+  gap: 0.4rem;
+  margin-top: 0.3rem;
+}
+
+.btn-mini {
+  background: transparent;
+  border: 1px solid rgba(201, 168, 76, 0.3);
+  color: var(--gold); /* var(--gold) → global */
+  font-family: inherit;
+  font-size: 0.65rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  padding: 0.35rem 0.7rem;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: all 0.25s;
+}
+
+.btn-mini.btn-confirm:hover {
+  background: var(--gold); /* var(--gold) → global */
+  color: var(--black); /* var(--black) → global */
+}
+
+.btn-mini.btn-cancel {
+  border-color: rgba(220, 90, 90, 0.4);
+  color: #e58484;
+}
+
+.btn-mini.btn-cancel:hover {
+  background: rgba(220, 90, 90, 0.15);
+  border-color: #e58484;
+}
+
+/* =====================================================
+   RESPONSIVO
+===================================================== */
+@media (max-width: 980px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+
+  .form-panel {
+    position: static;
+  }
+
+  .appointment {
+    grid-template-columns: 100px 1fr;
+  }
+
+  .appointment-side {
+    grid-column: 1 / -1;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 0.8rem;
+    border-top: 1px solid rgba(201, 168, 76, 0.12);
+    margin-top: 0.5rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .page-hero {
+    padding: 3.5rem 1.2rem 4rem;
+  }
+}

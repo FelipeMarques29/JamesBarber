@@ -1,0 +1,152 @@
+<app-navbar></app-navbar>
+
+<section class="page-hero">
+  <div class="bg-text">REVIEWS</div>
+
+  <div class="section-header">
+    <span class="section-label">O que dizem nossos clientes</span>
+    <h1 class="section-title">Avaliações</h1>
+    <div class="gold-line"></div>
+
+    <div class="rating-summary">
+      <div class="rating-big">
+        <span class="rating-value">{{ mediaRating() }}</span>
+        <div class="rating-stars">
+          @for (estrela of estrelasDe(mediaRating()); track $index) {
+            @switch (estrela) {
+              @case ('full') {
+                <svg viewBox="0 0 24 24" class="star full"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              }
+              @case ('half') {
+                <svg viewBox="0 0 24 24" class="star half">
+                  <defs>
+                    <linearGradient id="half-summary"><stop offset="50%" stop-color="#C9A84C"/><stop offset="50%" stop-color="transparent"/></linearGradient>
+                  </defs>
+                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" fill="url(#half-summary)" stroke="#C9A84C" stroke-width="1"/>
+                </svg>
+              }
+              @case ('empty') {
+                <svg viewBox="0 0 24 24" class="star empty"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              }
+            }
+          }
+        </div>
+        <span class="rating-count">{{ reviews().length }} avaliações</span>
+      </div>
+
+      <button type="button" class="btn-primary" (click)="abrirModal()">Deixar avaliação</button>
+    </div>
+  </div>
+
+  <div class="reviews-grid">
+    @for (r of reviews(); track r.id; let i = $index) {
+      <article class="review-card" [style.--delay]="(i * 0.06) + 's'">
+        <header class="review-head">
+          <img [src]="r.avatarUrl" [alt]="'Avatar de ' + r.autor" class="avatar" loading="lazy">
+          <div class="autor-wrap">
+            <span class="autor-nome">{{ r.autor }}</span>
+            <span class="autor-data">{{ r.data }}</span>
+          </div>
+          <div class="card-stars">
+            @for (estrela of estrelasDe(r.rating); track $index) {
+              @switch (estrela) {
+                @case ('full') {
+                  <svg viewBox="0 0 24 24" class="star full"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                }
+                @case ('half') {
+                  <svg viewBox="0 0 24 24" class="star half">
+                    <defs><linearGradient [id]="'half-' + r.id"><stop offset="50%" stop-color="#C9A84C"/><stop offset="50%" stop-color="transparent"/></linearGradient></defs>
+                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" [attr.fill]="'url(#half-' + r.id + ')'" stroke="#C9A84C" stroke-width="1"/>
+                  </svg>
+                }
+                @case ('empty') {
+                  <svg viewBox="0 0 24 24" class="star empty"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                }
+              }
+            }
+          </div>
+        </header>
+
+        <h3 class="review-title">{{ r.titulo }}</h3>
+        <p class="review-desc">{{ r.descricao }}</p>
+      </article>
+    }
+  </div>
+</section>
+
+<!-- MODAL -->
+@if (modalAberto()) {
+  <div class="modal-overlay" (click)="fecharModal()">
+    <div class="modal" (click)="$event.stopPropagation()" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <header class="modal-head">
+        <h2 id="modal-title">Sua avaliação</h2>
+        <button type="button" class="btn-close" (click)="fecharModal()" aria-label="Fechar">×</button>
+      </header>
+
+      <form [formGroup]="form" (ngSubmit)="enviarReview()" class="modal-form">
+        <div class="field rating-field">
+          <span class="field-label">Sua nota</span>
+          <div class="rating-input" (mouseleave)="resetHover()">
+            @for (estrela of estrelasInput(); track $index; let i = $index) {
+              <div class="star-wrap">
+                <button type="button" class="star-half-btn left"
+                        (mouseenter)="hoverEstrela(i + 0.5)"
+                        (click)="selecionarEstrela(i + 0.5)"
+                        [attr.aria-label]="(i + 0.5) + ' estrelas'"></button>
+                <button type="button" class="star-half-btn right"
+                        (mouseenter)="hoverEstrela(i + 1)"
+                        (click)="selecionarEstrela(i + 1)"
+                        [attr.aria-label]="(i + 1) + ' estrelas'"></button>
+
+                @switch (estrela) {
+                  @case ('full') {
+                    <svg viewBox="0 0 24 24" class="star-visual full"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                  }
+                  @case ('half') {
+                    <svg viewBox="0 0 24 24" class="star-visual half">
+                      <defs><linearGradient [id]="'half-input-' + i"><stop offset="50%" stop-color="#C9A84C"/><stop offset="50%" stop-color="transparent"/></linearGradient></defs>
+                      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" [attr.fill]="'url(#half-input-' + i + ')'" stroke="#C9A84C" stroke-width="1"/>
+                    </svg>
+                  }
+                  @case ('empty') {
+                    <svg viewBox="0 0 24 24" class="star-visual empty"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                  }
+                }
+              </div>
+            }
+            <span class="rating-text">{{ form.controls.rating.value }} de 5</span>
+          </div>
+        </div>
+
+        <label class="field">
+          <span class="field-label">Seu nome</span>
+          <input type="text" formControlName="autor" placeholder="Como deve aparecer na avaliação">
+          @if (form.controls.autor.touched && form.controls.autor.invalid) {
+            <span class="error">Informe um nome com pelo menos 3 letras.</span>
+          }
+        </label>
+
+        <label class="field">
+          <span class="field-label">Título</span>
+          <input type="text" formControlName="titulo" placeholder="Ex: Atendimento impecável" maxlength="60">
+          @if (form.controls.titulo.touched && form.controls.titulo.invalid) {
+            <span class="error">Mínimo de 4 caracteres.</span>
+          }
+        </label>
+
+        <label class="field">
+          <span class="field-label">Descrição</span>
+          <textarea formControlName="descricao" rows="4" placeholder="Conte como foi sua experiência..." maxlength="280"></textarea>
+          @if (form.controls.descricao.touched && form.controls.descricao.invalid) {
+            <span class="error">Mínimo de 15 caracteres.</span>
+          }
+        </label>
+
+        <div class="modal-actions">
+          <button type="button" class="btn-ghost" (click)="fecharModal()">Cancelar</button>
+          <button type="submit" class="btn-primary">Enviar avaliação</button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
