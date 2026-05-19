@@ -1,18 +1,10 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Navbar } from '../../shared/components/navbar/navbar';
 
-interface Agendamento {
-  id: number;
-  cliente: string;
-  servico: string;
-  barbeiro: string;
-  data: string;
-  hora: string;
-  preco: number;
-  status: 'confirmado' | 'pendente' | 'concluido';
-}
+import { Navbar } from '@shared/components/navbar/navbar';
+import { Agendamento } from '@shared/models/agendamento-model';
+
 
 @Component({
   selector: 'app-agendamentos',
@@ -21,6 +13,7 @@ interface Agendamento {
   styleUrl: './agendamentos.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
+
 export class Agendamentos {
   private fb = inject(FormBuilder);
 

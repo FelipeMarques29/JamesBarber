@@ -20,7 +20,5 @@ export class AppComponent implements OnInit {
 
 
   ngOnInit() {
-    // Mantive aqui para testar assim que a página carregar também
-    console.log('Página carregada, testando conexão automática...');
   }
 }

@@ -1,0 +1,84 @@
+<app-navbar></app-navbar>
+
+<section class="page-hero">
+  <div class="bg-text">ADMIN</div>
+
+  <div class="section-header">
+    <span class="section-label">Painel administrativo</span>
+    <h1 class="section-title">Usuários</h1>
+    <div class="gold-line"></div>
+    <p class="section-desc">Busque um usuário pelo e-mail para gerenciar permissões.</p>
+  </div>
+
+  <!-- Campo de busca -->
+  <div class="busca-wrap">
+    <input
+      class="busca-input"
+      type="email"
+      [(ngModel)]="busca"
+      placeholder="Digite o e-mail do usuário..."
+      (keyup.enter)="buscarCliente()"
+    />
+    <button class="btn-primary" (click)="buscarCliente()">
+      <i class="ti ti-search"></i> Buscar
+    </button>
+  </div>
+
+  <!-- Resultado -->
+  @if (carregando) {
+    <p class="loading">Buscando...</p>
+  }
+
+  @if (!carregando && clientes.length === 0 && busca) {
+    <p class="vazio">Nenhum usuário encontrado para este e-mail.</p>
+  }
+
+  @if (clientes.length > 0) {
+    <div class="lista">
+      @for (c of clientes; track c.id) {
+        <div class="usuario-card">
+
+          <!-- Info -->
+          <div class="usuario-info">
+            <div class="avatar-mini">{{ c.nome[0].toUpperCase() }}</div>
+            <div>
+              <p class="usuario-nome">{{ c.nome }}</p>
+              <p class="usuario-email">{{ c.email }}</p>
+            </div>
+            <span class="badge" [class]="c.status">{{ c.status }}</span>
+          </div>
+
+          <!-- Ações -->
+          <div class="usuario-acoes">
+            @if (c.status !== 'funcionario') {
+              <select class="select-funcao" #funcaoSelect>
+                <option value="">Selecionar função</option>
+                @for (f of funcoes; track f) {
+                  <option [value]="f">{{ f }}</option>
+                }
+              </select>
+              <button class="btn-acao btn-funcionario"
+                (click)="promover(c, 'funcionario', funcaoSelect.value)">
+                → Funcionário
+              </button>
+            }
+            @if (c.status !== 'admin') {
+              <button class="btn-acao btn-admin"
+                (click)="promover(c, 'admin')">
+                → Admin
+              </button>
+            }
+            @if (c.status !== 'cliente') {
+              <button class="btn-acao btn-rebaixar"
+                (click)="promover(c, 'cliente')">
+                → Cliente
+              </button>
+            }
+          </div>
+
+        </div>
+      }
+    </div>
+  }
+
+</section>

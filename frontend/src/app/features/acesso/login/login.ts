@@ -3,8 +3,8 @@ import { Component, inject } from '@angular/core';
 import { FormsModule} from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 
-import { ApiService } from '@core/api-service'; // Ajuste os ../ para chegar na pasta services
-import { ClienteLogin } from '@shared/models/cliente.model'; // Ajuste os ../ para chegar na pasta models
+import { ApiService } from '@core/api-service';
+import { LoginRequest, LoginResponse } from '@shared/models/auth-model';
 
 @Component({
   selector: 'app-login',
@@ -20,27 +20,31 @@ export class Login {
   private apiService = inject(ApiService);
   private router = inject(Router);
 
-  usuario: ClienteLogin = {
-    cliente_email: '',
-    cliente_senha: ''
+  usuario: LoginRequest = {
+    email: '',
+    senha: ''
   };
 
   fazerLogin() {
-      console.log('Tentando login com:', this.usuario);
 
-      // Chamando o seu serviço (ajuste o nome do método se necessário)
-      this.apiService.login(this.usuario).subscribe({
-        next: (res) => {
-          // alert('Bem-vindo ao JamesBarber!');
+    this.apiService.login(this.usuario).subscribe({
+      next: (res: LoginResponse) => {
+
+        // ← salva ANTES de navegar
+        localStorage.setItem('usuario', JSON.stringify(res.usuario));
+
+        // ← redireciona conforme o tipo
+        if (res.tipo === 'funcionario') { //|| res.tipo === 'admin') {
+          this.router.navigate(['/funcionario/home']);
+        } else {
           this.router.navigate(['/home']);
-          // Aqui você usaria o Router para ir para a tela de agenda
-        },
-        error: (err) => alert('E-mail ou senha incorretos.')
-      });
-    }
+        }
+      },
+      error: (err) => alert('E-mail ou senha incorretos.')
+    });
+  }
 
-    irParaCadastro() {
-      // Aqui você enviaria o usuário para a rota de cadastro
-      this.router.navigate(['/cadastro']);
-    }
+  irParaCadastro() {
+    this.router.navigate(['/cadastro']);
+  }
 }

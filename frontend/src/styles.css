@@ -4,9 +4,49 @@
 *::before,
 *::after {
   box-sizing: border-box;
-}
-
-html, body {
   margin: 0;
   padding: 0;
+}
+
+:root {
+  --gold: #C9A84C;
+  --gold-light: #e8c97a;
+  --gold-dark: #9a7a2e;
+  --black: #0a0a0a;
+  --dark: #111111;
+  --dark2: #1a1a1a;
+  --dark3: #222222;
+  --text: #e8e0d0;
+  --text-muted: #8a7e6e;
+  --white: #ffffff;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--black);
+  color: var(--text);
+  font-family: 'Josefin Sans', sans-serif; /* ← fonte única para todo o projeto */
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* SCROLL ESCONDIDO */
+/* IE / Edge antigo / Firefox */
+* {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+/* Chrome / Safari */
+*::-webkit-scrollbar {
+  display: none;
 }

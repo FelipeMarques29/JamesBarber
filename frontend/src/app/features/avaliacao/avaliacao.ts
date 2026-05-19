@@ -16,13 +16,13 @@ interface Review {
 type EstrelaTipo = 'full' | 'half' | 'empty';
 
 @Component({
-  selector: 'app-clientes',
+  selector: 'app-avaliacao',
   imports: [CommonModule, ReactiveFormsModule, Navbar],
-  templateUrl: './clientes.html',
-  styleUrl: './clientes.css',
+  templateUrl: './avaliacao.html',
+  styleUrl: './avaliacao.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class Clientes {
+export class Avaliacao {
   private fb = inject(FormBuilder);
 
   readonly modalAberto = signal(false);

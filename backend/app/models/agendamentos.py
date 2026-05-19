@@ -2,7 +2,8 @@ from pydantic import BaseModel
 from typing import Optional
 from datetime import datetime
 
-class AgendamentoBase (BaseModel):
+
+class Agendamento (BaseModel):
     barbeiro_id: str
     barbeiro_nome: str
     cliente_id: str
@@ -11,10 +12,10 @@ class AgendamentoBase (BaseModel):
     servico_id: str
     valor_total: float
 
-class AgendamentoCreate(AgendamentoBase):
+class AgendamentoCreate(Agendamento):
     status: Optional[str] = "pendente"
 
-class AgendamentoResponse(AgendamentoBase):
+class AgendamentoResponse(Agendamento):
     id: str # O ID gerado pelo Firebase
     status: str
     criado_em: datetime

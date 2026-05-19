@@ -1,41 +1,19 @@
-/* ===========================
-   VARIÁVEIS & RESET
-=========================== */
-:root {
-  --gold: #C9A84C;
-  --gold-light: #e8c97a;
-  --gold-dark: #9a7a2e;
-  --black: #0a0a0a;
-  --dark: #111111;
-  --dark2: #1a1a1a;
-  --dark3: #222222;
-  --text: #e8e0d0;
-  --text-muted: #8a7e6e;
-  --white: #ffffff;
-}
+/* =====================================================
+   HOME.CSS
+   Reset, variáveis, body, fadeUp → vêm do styles.css (global)
+   Tudo abaixo é exclusivo desta página
+===================================================== */
 
-*, *::before, *::after {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-html {
-  scroll-behavior: smooth;
-}
-
-body {
-  background-color: var(--black);
-  color: var(--text);
-  font-family: 'Josefin Sans', sans-serif;
+/* ── Encapsulamento do componente ── */
+:host {
+  display: block;
   min-height: 100vh;
-  overflow-x: hidden;
+  /* background e color → herdados do body global */
 }
 
-
-/* ===========================
+/* =====================================================
    HERO
-=========================== */
+===================================================== */
 .hero {
   position: relative;
   min-height: 100vh;
@@ -43,129 +21,117 @@ body {
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  background: var(--black);
+  /* background → var(--black) herdado do body global */
 }
 
+/* gradiente decorativo — específico da home */
 .hero::before {
   content: '';
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(ellipse 60% 60% at 70% 50%, rgba(201, 168, 76, 0.07) 0%, transparent 70%),
-    radial-gradient(ellipse 40% 80% at 20% 80%, rgba(201, 168, 76, 0.04) 0%, transparent 60%);
+    radial-gradient(ellipse 60% 70% at 70% 50%, rgba(201, 168, 76, 0.07) 0%, transparent 65%),
+    radial-gradient(ellipse 40% 50% at 20% 30%, rgba(201, 168, 76, 0.04) 0%, transparent 60%);
+  pointer-events: none;
 }
 
+/* texto gigante decorativo — específico da home */
 .hero-bg-text {
   position: absolute;
-  font-family: 'Playfair Display', serif;
-  font-size: clamp(8rem, 20vw, 22rem);
-  font-weight: 900;
-  color: transparent;
-  -webkit-text-stroke: 1px rgba(201, 168, 76, 0.06);
-  user-select: none;
-  letter-spacing: -0.02em;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(10rem, 28vw, 28rem);
+  font-weight: 900;
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(201, 168, 76, 0.05);
+  user-select: none;
   white-space: nowrap;
+  pointer-events: none;
+  letter-spacing: -0.02em;
 }
 
+/* conteúdo central do hero */
 .hero-content {
   position: relative;
-  z-index: 2;
+  z-index: 1;
   text-align: center;
-  padding: 2rem;
-  animation: fadeUp 1s ease both;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.8rem;
+  animation: fadeUp 0.9s ease both; /* fadeUp → global */
 }
 
 .hero-subtitle {
-  font-size: 0.75rem;
-  letter-spacing: 0.4em;
+  font-size: 0.7rem;
+  letter-spacing: 0.5em;
   text-transform: uppercase;
-  color: var(--gold);
-  margin-bottom: 1.5rem;
+  color: var(--gold); /* var(--gold) → global */
 }
 
 .hero-title {
   font-family: 'Playfair Display', serif;
-  font-size: clamp(3rem, 7vw, 6rem);
-  font-weight: 900;
+  font-size: clamp(3rem, 8vw, 7rem);
+  font-weight: 700;
+  color: var(--white); /* var(--white) → global */
   line-height: 1.1;
-  color: var(--white);
-  margin-bottom: 2.5rem;
+  margin: 0;
 }
 
 .hero-title em {
   font-style: italic;
-  color: var(--gold);
+  color: var(--gold); /* var(--gold) → global */
 }
 
-.btn-primary {
-  display: inline-block;
-  padding: 1rem 3rem;
-  background: var(--gold);
-  color: var(--black);
-  text-decoration: none;
-  font-family: 'Josefin Sans', sans-serif;
-  font-size: 0.8rem;
-  font-weight: 600;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  transition: all 0.3s;
-  position: relative;
-  overflow: hidden;
-}
-
-.btn-primary::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: rgba(255,255,255,0.15);
-  transform: translateX(-100%);
-  transition: transform 0.3s;
-}
-
-.btn-primary:hover::after {
-  transform: translateX(0);
-}
-
-.btn-primary:hover {
-  box-shadow: 0 0 30px rgba(201, 168, 76, 0.4);
-}
-
+/* ornamento decorativo inferior do hero */
 .hero-ornament {
   position: absolute;
-  bottom: 3rem;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 1px;
-  height: 60px;
-  background: linear-gradient(to bottom, var(--gold), transparent);
-  animation: pulse 2s ease-in-out infinite;
-}
-
-/* ===========================
-   SERVIÇOS
-=========================== */
-.servicos {
-  padding: 7rem 3rem;
-  background: var(--dark);
-  position: relative;
-}
-
-.servicos::before {
-  content: '';
-  position: absolute;
-  top: 0;
+  bottom: 0;
   left: 0;
   right: 0;
   height: 1px;
-  background: linear-gradient(to right, transparent, var(--gold), transparent);
+  background: linear-gradient(90deg, transparent, rgba(201, 168, 76, 0.3), transparent);
 }
 
+/* ── Botão primário ── */
+.btn-primary {
+  display: inline-block;
+  background: var(--gold); /* var(--gold) → global */
+  color: var(--black); /* var(--black) → global */
+  text-decoration: none;
+  border: none;
+  padding: 0.9rem 2.2rem;
+  font-family: inherit; /* font-family → herdado do body global */
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  cursor: pointer;
+  border-radius: 2px;
+  transition: background 0.25s, transform 0.25s, box-shadow 0.25s;
+}
+
+.btn-primary:hover {
+  background: var(--gold-light); /* var(--gold-light) → global */
+  transform: translateY(-2px);
+  box-shadow: 0 0 28px rgba(201, 168, 76, 0.4);
+}
+
+/* =====================================================
+   SERVIÇOS
+===================================================== */
+.servicos {
+  padding: 6rem 3rem;
+  /* background → herdado do body global */
+}
+
+/* ── Section header (padrão compartilhado com agendamentos) ── */
 .section-header {
   text-align: center;
   margin-bottom: 4rem;
+  animation: fadeUp 0.8s ease both; /* fadeUp → global */
 }
 
 .section-label {
@@ -173,7 +139,7 @@ body {
   font-size: 0.7rem;
   letter-spacing: 0.4em;
   text-transform: uppercase;
-  color: var(--gold);
+  color: var(--gold); /* var(--gold) → global */
   margin-bottom: 0.8rem;
 }
 
@@ -181,269 +147,160 @@ body {
   font-family: 'Playfair Display', serif;
   font-size: clamp(2rem, 4vw, 3.5rem);
   font-weight: 700;
-  color: var(--white);
-  margin-bottom: 1.2rem;
+  color: var(--white); /* var(--white) → global */
+  margin: 0 0 1.2rem;
 }
 
 .gold-line {
   width: 60px;
   height: 2px;
-  background: var(--gold);
+  background: var(--gold); /* var(--gold) → global */
   margin: 0 auto;
 }
 
-/* GRID */
+/* ── Grid de cards ── */
 .cards-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(310px, 1fr));
-  gap: 1.8rem;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
   max-width: 1240px;
   margin: 0 auto;
 }
 
-/* CARD */
+/* ── Card de serviço ── */
 .card {
-  background:
-    linear-gradient(180deg, rgba(201, 168, 76, 0.03) 0%, transparent 40%),
-    var(--dark2);
-  border: 1px solid rgba(201, 168, 76, 0.35);
-  border-radius: 4px;
-  padding: 2.5rem 2rem 2rem;
   position: relative;
-  box-shadow: 0 0 22px rgba(201, 168, 76, 0.12);
-  transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1),
-              box-shadow 0.45s ease,
-              border-color 0.45s ease;
-  animation: fadeUp 0.7s ease both;
+  background: linear-gradient(180deg, rgba(201, 168, 76, 0.03) 0%, transparent 40%), var(--dark2); /* var(--dark2) → global */
+  border: 1px solid rgba(201, 168, 76, 0.1);
+  border-radius: 4px;
+  padding: 2rem 1.8rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  transition: border-color 0.3s, transform 0.3s, box-shadow 0.3s;
+  animation: fadeUp 0.7s ease both; /* fadeUp → global */
   animation-delay: var(--delay, 0s);
-  overflow: hidden;
-  isolation: isolate;
-}
-
-/* Brilho radial dourado vindo do topo (aparece no hover) */
-.card::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: radial-gradient(circle at 50% 0%, rgba(201, 168, 76, 0.14), transparent 60%);
-  opacity: 0;
-  transition: opacity 0.45s ease;
-  z-index: 0;
-}
-
-.card:hover::before {
-  opacity: 1;
-}
-
-/* Linha dourada superior (constante, cresce no hover) */
-.card::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 50%;
-  width: 40px;
-  height: 2px;
-  background: var(--gold);
-  transform: translateX(-50%);
-  transition: width 0.45s ease;
-  z-index: 2;
-}
-
-.card:hover::after {
-  width: 100%;
 }
 
 .card:hover {
-  border-color: rgba(201, 168, 76, 0.55);
-  transform: translateY(-8px);
-  box-shadow:
-    0 25px 60px rgba(0, 0, 0, 0.55),
-    0 0 35px rgba(201, 168, 76, 0.18),
-    inset 0 1px 0 rgba(201, 168, 76, 0.15);
+  border-color: rgba(201, 168, 76, 0.3);
+  transform: translateY(-4px);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
 }
 
-/* Card destaque (Combo Premium) — apenas o badge "Popular" diferencia agora */
+/* card destaque (Popular) */
+.card.destaque {
+  border-color: rgba(201, 168, 76, 0.35);
+  background: linear-gradient(160deg, rgba(201, 168, 76, 0.07) 0%, var(--dark2) 50%); /* var(--dark2) → global */
+}
 
+.card.destaque:hover {
+  border-color: var(--gold); /* var(--gold) → global */
+  box-shadow: 0 16px 48px rgba(201, 168, 76, 0.15);
+}
+
+/* badge "Popular" */
 .card-badge {
   position: absolute;
-  top: 1.2rem;
-  right: 1.2rem;
-  background: var(--gold);
-  color: var(--black);
+  top: -1px;
+  right: 1.5rem;
+  background: var(--gold); /* var(--gold) → global */
+  color: var(--black); /* var(--black) → global */
   font-size: 0.6rem;
   font-weight: 700;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
-  padding: 0.4rem 0.9rem;
-  border-radius: 2px;
-  box-shadow: 0 0 20px rgba(201, 168, 76, 0.4);
-  z-index: 2;
+  padding: 0.3rem 0.8rem;
+  border-radius: 0 0 3px 3px;
 }
 
-/* Conteúdo do card acima do brilho ::before */
-.card-icon,
-.card-title,
-.card-desc,
-.card-divider,
-.card-footer {
-  position: relative;
-  z-index: 1;
-}
-
-/* ÍCONE com moldura dourada */
 .card-icon {
-  width: 72px;
-  height: 72px;
-  margin-bottom: 1.5rem;
+  width: 52px;
+  height: 52px;
+  border-radius: 8px;
+  background: rgba(201, 168, 76, 0.08);
+  border: 1px solid rgba(201, 168, 76, 0.15);
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid rgba(201, 168, 76, 0.25);
-  border-radius: 50%;
-  background:
-    radial-gradient(circle at center, rgba(201, 168, 76, 0.08), transparent 70%),
-    rgba(255, 255, 255, 0.015);
-  transition: all 0.45s ease;
-}
-
-.card-icon::before {
-  content: '';
-  position: absolute;
-  inset: -3px;
-  border-radius: 50%;
-  border: 1px solid rgba(201, 168, 76, 0.1);
-  opacity: 0;
-  transition: opacity 0.45s ease;
-}
-
-.card:hover .card-icon {
-  border-color: rgba(201, 168, 76, 0.55);
-  background:
-    radial-gradient(circle at center, rgba(201, 168, 76, 0.18), transparent 70%),
-    rgba(255, 255, 255, 0.02);
-  transform: scale(1.05) rotate(-2deg);
-}
-
-.card:hover .card-icon::before {
-  opacity: 1;
-}
-
-.card-icon img {
-  width: 36px;
-  height: 36px;
-  display: block;
-  filter: drop-shadow(0 0 8px rgba(201, 168, 76, 0.15));
-  transition: transform 0.45s ease;
-}
-
-.card:hover .card-icon img {
-  transform: scale(1.08);
 }
 
 .card-title {
   font-family: 'Playfair Display', serif;
-  font-size: 1.4rem;
+  font-size: 1.2rem;
   font-weight: 700;
-  color: var(--white);
-  margin-bottom: 0.8rem;
-  letter-spacing: 0.01em;
+  color: var(--white); /* var(--white) → global */
+  margin: 0;
 }
 
 .card-desc {
   font-size: 0.85rem;
-  color: var(--text-muted);
+  color: var(--text-muted); /* var(--text-muted) → global */
   line-height: 1.7;
-  margin-bottom: 1.5rem;
-  min-height: 4.5rem;
+  margin: 0;
+  flex: 1;
 }
 
-/* Divisor sutil entre conteúdo e preço */
 .card-divider {
   height: 1px;
-  background: linear-gradient(to right, transparent, rgba(201, 168, 76, 0.2), transparent);
-  margin-bottom: 1.3rem;
+  background: rgba(201, 168, 76, 0.1);
 }
 
+/* ── Footer do card ── */
 .card-footer {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem;
 }
 
 .card-price-wrap {
   display: flex;
   flex-direction: column;
-  gap: 0.1rem;
+  gap: 0.15rem;
 }
 
 .card-price-label {
   font-size: 0.6rem;
+  letter-spacing: 0.15em;
   text-transform: uppercase;
-  letter-spacing: 0.18em;
-  color: var(--text-muted);
+  color: var(--text-muted); /* var(--text-muted) → global */
 }
 
 .card-price {
   font-family: 'Playfair Display', serif;
-  font-size: 1.7rem;
+  font-size: 1.4rem;
   font-weight: 700;
-  color: var(--gold);
+  color: var(--gold); /* var(--gold) → global */
   line-height: 1;
 }
 
 .btn-agendar {
   background: transparent;
-  border: 1px solid var(--gold);
-  color: var(--gold);
-  padding: 0.65rem 1.4rem;
-  font-family: 'Josefin Sans', sans-serif;
-  font-size: 0.72rem;
-  font-weight: 600;
+  border: 1px solid rgba(201, 168, 76, 0.35);
+  color: var(--gold); /* var(--gold) → global */
+  font-family: inherit; /* font-family → herdado do body global */
+  font-size: 0.65rem;
+  font-weight: 700;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  position: relative;
-  overflow: hidden;
+  padding: 0.55rem 1.1rem;
   border-radius: 2px;
-}
-
-.btn-agendar::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: var(--gold);
-  transform: translateX(-101%);
-  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
-  z-index: -1;
+  cursor: pointer;
+  transition: all 0.25s;
 }
 
 .btn-agendar:hover {
-  color: var(--black);
-  border-color: var(--gold);
-  box-shadow: 0 0 20px rgba(201, 168, 76, 0.35);
+  background: var(--gold); /* var(--gold) → global */
+  color: var(--black); /* var(--black) → global */
 }
 
-.btn-agendar:hover::before {
-  transform: translateX(0);
-}
-
-
-/* Logo image do footer */
-.logo-icon-img {
-  display: block;
-}
-
-/* ===========================
+/* =====================================================
    FOOTER
-=========================== */
+===================================================== */
 .footer {
-  background: var(--black);
-  border-top: 1px solid rgba(201, 168, 76, 0.15);
   padding: 3rem;
   text-align: center;
+  border-top: 1px solid rgba(201, 168, 76, 0.1);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -453,62 +310,47 @@ body {
 .footer-brand {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 10px;
   margin-bottom: 0.5rem;
 }
 
-.footer-text {
-  font-size: 0.8rem;
-  color: var(--text-muted);
+.logo-icon-img {
+  filter: invert(75%) sepia(40%) saturate(500%) hue-rotate(5deg);
+}
+
+.logo-text {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--white); /* var(--white) → global */
   letter-spacing: 0.05em;
+}
+
+.footer-text {
+  font-size: 0.82rem;
+  color: var(--text-muted); /* var(--text-muted) → global */
+  line-height: 1.6;
 }
 
 .footer-copy {
-  font-size: 0.7rem;
-  color: rgba(138, 126, 110, 0.5);
+  font-size: 0.72rem;
+  color: #444;
   letter-spacing: 0.05em;
 }
 
-/* ===========================
-   ANIMAÇÕES
-=========================== */
-@keyframes fadeUp {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes pulse {
-  0%, 100% { opacity: 0.4; }
-  50% { opacity: 1; }
-}
-
-/* ===========================
+/* =====================================================
    RESPONSIVO
-=========================== */
+===================================================== */
 @media (max-width: 768px) {
-  .navbar {
-    padding: 1rem 1.5rem;
-  }
-
-  .nav-links {
-    display: none;
-  }
-
-  .user-name {
-    display: none;
-  }
-
   .servicos {
-    padding: 5rem 1.5rem;
+    padding: 4rem 1.2rem;
   }
 
   .cards-grid {
     grid-template-columns: 1fr;
+  }
+
+  .hero-content {
+    padding: 0 1.5rem;
   }
 }
