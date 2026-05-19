@@ -7,9 +7,10 @@ backend/.env
 backend/firebase-key.json
 
 backend/.pytest_cache/
-backend/models/__pycache__/
-backend/routers/__pycache/
-backend/utils/__pycache/
+backend/app/__pycache__/
+backend/app/models/__pycache__/
+backend/app/routers/__pycache/
+backend/app/utils/__pycache/
 
 #frontend
 # See https://docs.github.com/get-started/getting-started-with-git/ignoring-files for more about ignoring files.
