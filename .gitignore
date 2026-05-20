@@ -1,16 +1,16 @@
 #backend
+# Ambientes Virtuais
 backend/venv/
 backend/.venv/
-backend/__pycache__/
-backend/*.pyc
+
+# Caches do Python e de Testes
+*.pyc
+__pycache__/
+backend/.pytest_cache/
+
+# Arquivos de Configuração e Credenciais (Segurança)
 backend/.env
 backend/firebase-key.json
-
-backend/.pytest_cache/
-backend/app/__pycache__/
-backend/app/models/__pycache__/
-backend/app/routers/__pycache/
-backend/app/utils/__pycache/
 
 #frontend
 # See https://docs.github.com/get-started/getting-started-with-git/ignoring-files for more about ignoring files.
