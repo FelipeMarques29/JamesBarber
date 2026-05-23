@@ -1,3 +1,4 @@
+import { environment } from './../../environments/environment.development';
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
@@ -10,8 +11,9 @@ import { LoginRequest, LoginResponse } from '@shared/models/auth-model';
 })
 export class ApiService {
   // Use a URL que aparece no seu Swagger (provavelmente localhost:8000)
+  private readonly API_URL = environment.apiUrl;
   // private readonly API_URL = 'http://127.0.0.1:8000';
-  private readonly API_URL = 'http://192.168.15.2:8000';
+  // private readonly API_URL = 'http://192.168.15.2:8000';
 
   constructor(private http: HttpClient) { }
 

@@ -1,6 +1,6 @@
 # routers/auth.py
 from fastapi import APIRouter, HTTPException
-from app.database import db
+from app.db.database import db
 from app.models.auth import Login
 from app.utils.hash import Hash
 from google.cloud.firestore_v1.base_query import FieldFilter

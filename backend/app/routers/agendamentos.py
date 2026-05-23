@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException
-from app.database import db
+from app.db.database import db
 from datetime import datetime
 from app.models.agendamentos import AgendamentoCreate
 
