@@ -7,16 +7,16 @@
     <span class="section-label">Painel administrativo</span>
     <h1 class="section-title">Usuários</h1>
     <div class="gold-line"></div>
-    <p class="section-desc">Busque um usuário pelo e-mail para gerenciar permissões.</p>
+    <p class="section-desc">Gerencie clientes e funcionários.</p>
   </div>
 
-  <!-- Campo de busca -->
+  <!-- Busca por cliente -->
   <div class="busca-wrap">
     <input
       class="busca-input"
       type="email"
       [(ngModel)]="busca"
-      placeholder="Digite o e-mail do usuário..."
+      placeholder="Digite o e-mail do cliente..."
       (keyup.enter)="buscarCliente()"
     />
     <button class="btn-primary" (click)="buscarCliente()">
@@ -24,61 +24,124 @@
     </button>
   </div>
 
-  <!-- Resultado -->
-  @if (carregando) {
+  @if (carregandoClientes) {
     <p class="loading">Buscando...</p>
   }
-
-  @if (!carregando && clientes.length === 0 && busca) {
-    <p class="vazio">Nenhum usuário encontrado para este e-mail.</p>
+  @if (!carregandoClientes && clientes.length === 0 && busca) {
+    <p class="vazio">Nenhum cliente encontrado.</p>
+  }
+  @for (c of clientes; track c.id) {
+    <div class="usuario-card">
+      <div class="usuario-info">
+        <div class="avatar-mini">{{ c.nome[0].toUpperCase() }}</div>
+        <div>
+          <p class="usuario-nome">{{ c.nome }}</p>
+          <p class="usuario-email">{{ c.email }}</p>
+        </div>
+      </div>
+      <div class="usuario-acoes">
+        <select class="select-funcao" #funcaoSelect>
+          <option value="">Selecionar função</option>
+          @for (f of funcoes; track f) {
+            <option [value]="f">{{ f }}</option>
+          }
+        </select>
+        <button class="btn-acao btn-funcionario"
+          (click)="promover(c, 'funcionario', funcaoSelect.value)">
+          → Funcionário
+        </button>
+        <button class="btn-acao btn-admin"
+          (click)="promover(c, 'admin')">
+          → Admin
+        </button>
+      </div>
+    </div>
   }
 
-  @if (clientes.length > 0) {
-    <div class="lista">
-      @for (c of clientes; track c.id) {
-        <div class="usuario-card">
+  <!-- Selects de listagem -->
+  <div class="selects-wrap">
+      <div class="select-grupo">
+  <select class="form-select" [(ngModel)]="viewUsuarios" (ngModelChange)="onSelectUsuarios($event)">
+    <option value="">Selecionar listagem</option>
+    <option value="clientes">Clientes</option>
+    <option value="funcionarios">Funcionários</option>
+  </select>
 
-          <!-- Info -->
-          <div class="usuario-info">
-            <div class="avatar-mini">{{ c.nome[0].toUpperCase() }}</div>
-            <div>
-              <p class="usuario-nome">{{ c.nome }}</p>
-              <p class="usuario-email">{{ c.email }}</p>
-            </div>
-            <span class="badge" [class]="c.status">{{ c.status }}</span>
-          </div>
+  @if (carregandoTodosClientes || carregandoFuncionarios) {
+    <p class="loading">Carregando...</p>
+  }
 
-          <!-- Ações -->
-          <div class="usuario-acoes">
-            @if (c.status !== 'funcionario') {
-              <select class="select-funcao" #funcaoSelect>
-                <option value="">Selecionar função</option>
+  <!-- Tabela Clientes -->
+  @if (viewUsuarios === 'clientes' && !carregandoTodosClientes && todosClientes.length > 0) {
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>Nome</th>
+          <th>Email</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (c of todosClientes; track c.id) {
+          <tr>
+            <td>{{ c.nome }}</td>
+            <td>{{ c.email }}</td>
+            <td class="td-acoes">
+              <select class="select-funcao" #funcaoSelectTabela>
+                <option value="">Função</option>
                 @for (f of funcoes; track f) {
                   <option [value]="f">{{ f }}</option>
                 }
               </select>
               <button class="btn-acao btn-funcionario"
-                (click)="promover(c, 'funcionario', funcaoSelect.value)">
-                → Funcionário
+                (click)="promover(c, 'funcionario', funcaoSelectTabela.value)">
+                → Func
               </button>
-            }
-            @if (c.status !== 'admin') {
               <button class="btn-acao btn-admin"
                 (click)="promover(c, 'admin')">
                 → Admin
               </button>
-            }
-            @if (c.status !== 'cliente') {
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+
+  <!-- Tabela Funcionários -->
+  @if (viewUsuarios === 'funcionarios' && !carregandoFuncionarios && funcionarios.length > 0) {
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>Nome</th>
+          <th>Email</th>
+          <th>Função</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (f of funcionarios; track f.id) {
+          <tr>
+            <td>{{ f.nome }}</td>
+            <td>{{ f.email }}</td>
+            <td><span class="badge funcao">{{ f.funcao }}</span></td>
+            <td class="td-acoes">
               <button class="btn-acao btn-rebaixar"
-                (click)="promover(c, 'cliente')">
+                (click)="promover(f, 'cliente')">
                 → Cliente
               </button>
-            }
-          </div>
-
-        </div>
-      }
-    </div>
+              <button class="btn-acao btn-admin"
+                (click)="promover(f, 'admin')">
+                → Admin
+              </button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
   }
+</div>
+
+  </div>
 
 </section>

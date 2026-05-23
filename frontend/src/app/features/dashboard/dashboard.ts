@@ -18,26 +18,61 @@ export class Dashboard implements OnInit {
   private apiService = inject(ApiService);
 
   clientes: ClienteLista[] = [];
-  carregando = false;
+  todosClientes: ClienteLista[] = [];
+  funcionarios: ClienteLista[] = [];
+
+  carregandoClientes = false;
+  carregandoTodosClientes = false;
+  carregandoFuncionarios = false;
+
+  mostrarTodosClientes = false;
   busca = '';
+  viewClientes = '';
+  viewFuncionarios = '';
+  viewUsuarios = '';
 
   readonly funcoes = ['barbeiro', 'limpeza', 'balcao'];
 
   ngOnInit(): void {
-    // não carrega nada ao abrir — espera o admin buscar
+    this.carregarFuncionarios();
   }
 
   buscarCliente(): void {
     if (!this.busca.trim()) return;
-    this.carregando = true;
+    this.carregandoClientes = true;
 
     this.apiService.listarClientes(this.busca.trim()).subscribe({
       next: (res) => {
         this.clientes = res;
-        this.carregando = false;
+        this.carregandoClientes = false;
       },
-      error: () => this.carregando = false
+      error: () => (this.carregandoClientes = false),
     });
+  }
+
+  carregarFuncionarios(): void {
+    this.carregandoFuncionarios = true;
+    this.apiService.listarFuncionarios().subscribe({
+      next: (res) => {
+        this.funcionarios = res.filter(c => c.status === 'funcionario');
+        this.carregandoFuncionarios = false;
+      },
+      error: () => (this.carregandoFuncionarios = false),
+    });
+  }
+
+  toggleTodosClientes(): void {
+    this.mostrarTodosClientes = !this.mostrarTodosClientes;
+    if (this.mostrarTodosClientes && this.todosClientes.length === 0) {
+      this.carregandoTodosClientes = true;
+      this.apiService.listarTodosClientes().subscribe({
+        next: (res) => {
+          this.todosClientes = res.filter(c => c.status === 'cliente');
+          this.carregandoTodosClientes = false;
+        },
+        error: () => (this.carregandoTodosClientes = false),
+      });
+    }
   }
 
   promover(cliente: ClienteLista, status: 'funcionario' | 'admin' | 'cliente', funcao?: string): void {
@@ -45,13 +80,42 @@ export class Dashboard implements OnInit {
       alert('Selecione a função do funcionário.');
       return;
     }
-
     this.apiService.promoverCliente(cliente.id, status, funcao).subscribe({
       next: () => {
         alert(`${cliente.nome} atualizado para ${status}!`);
-        this.buscarCliente(); // recarrega a busca atual
+        this.buscarCliente();
+        this.carregarFuncionarios();
+        this.todosClientes = [];
+        this.mostrarTodosClientes = false;
       },
-      error: (err) => alert('Erro: ' + (err.error?.detail || 'Falha na operação'))
+      error: (err) => alert('Erro: ' + (err.error?.detail || 'Falha na operação')),
     });
   }
+
+  onSelectUsuarios(valor: string): void {
+    if (valor === 'clientes') {
+      this.todosClientes = [];
+      this.carregandoTodosClientes = true;
+      this.apiService.listarTodosClientes().subscribe({
+        next: (res) => {
+          this.todosClientes = res.filter(c => c.status === 'cliente');
+          this.carregandoTodosClientes = false;
+        },
+        error: () => (this.carregandoTodosClientes = false),
+      });
+  }
+
+  if (valor === 'funcionarios') {
+    this.funcionarios = [];
+    this.carregandoFuncionarios = true;
+    this.apiService.listarFuncionarios().subscribe({
+      next: (res) => {
+        this.funcionarios = res.filter(c => c.status === 'funcionario');
+        this.carregandoFuncionarios = false;
+      },
+      error: () => (this.carregandoFuncionarios = false),
+    });
+    }
+  }
+
 }

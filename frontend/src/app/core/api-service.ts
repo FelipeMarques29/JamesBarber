@@ -44,6 +44,21 @@ export class ApiService {
     return this.http.get<ClienteLista[]>(`${this.API_URL}/clientes/`, { params });
   }
 
+  listarTodosClientes(): Observable<ClienteLista[]> {
+    return this.http.get<ClienteLista[]>(`${this.API_URL}/clientes/`, {
+      params: { status: 'cliente' }
+    });
+  }
+
+  listarFuncionarios(): Observable<ClienteLista[]> {
+    return this.http.get<ClienteLista[]>(`${this.API_URL}/clientes/`, {
+      params: { status: 'funcionario' }
+    });
+  }
+
+  listarBarbeiros(): Observable<ClienteLista[]> {
+    return this.http.get<ClienteLista[]>(`${this.API_URL}/clientes/`);
+  }
 
   promoverCliente(
     id: string,
