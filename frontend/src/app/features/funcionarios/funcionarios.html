@@ -1,2 +1,59 @@
-<!-- <p>funcionarios works!</p> -->
 <app-navbar></app-navbar>
+
+<section class="page-hero">
+  <div class="bg-text">EQUIPE</div>
+
+  <div class="section-header">
+    <span class="section-label">Nossos profissionais</span>
+    <h1 class="section-title">Barbeiros</h1>
+    <div class="gold-line"></div>
+    <p class="section-desc">Conheça a equipe por trás da sua melhor versão.</p>
+  </div>
+
+  @if (carregando) {
+    <p class="loading">Carregando...</p>
+  }
+
+  @if (!carregando && barbeiros.length === 0) {
+    <p class="vazio">Nenhum barbeiro cadastrado.</p>
+  }
+
+  <div class="barbeiros-grid">
+    @for (b of barbeiros; track b.id) {
+      <div class="barbeiro-card">
+
+        <div class="barbeiro-avatar-wrap">
+          <div class="barbeiro-avatar">{{ b.nome[0].toUpperCase() }}</div>
+          <span class="barbeiro-funcao">{{ b.funcao }}</span>
+        </div>
+
+        <div class="barbeiro-body">
+          <h3 class="barbeiro-nome">{{ b.nome }}</h3>
+          <p class="barbeiro-especialidade">
+            <i class="ti ti-scissors"></i> {{ b.especialidade }}
+          </p>
+          <p class="barbeiro-desc">{{ b.descricao }}</p>
+        </div>
+
+        <div class="barbeiro-stats">
+          <div class="stat">
+            <span class="stat-valor">{{ b.experiencia }}+</span>
+            <span class="stat-label">Anos de experiência</span>
+          </div>
+          <div class="stat-divider"></div>
+          <div class="stat">
+            <span class="stat-valor">100%</span>
+            <span class="stat-label">Satisfação</span>
+          </div>
+          <div class="stat-divider"></div>
+          <div class="stat">
+            <span class="stat-valor">5★</span>
+            <span class="stat-label">Avaliação</span>
+          </div>
+        </div>
+
+      </div>
+    }
+  </div>
+
+</section>

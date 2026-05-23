@@ -27,6 +27,12 @@ app.include_router(auth.router)
 def home():
     return {"message": "JamesBarber API está online!"}
 
-# uvicorn main:app --host 0.0.0.0 --port 8000 --reload
-# http://localhost:8000/docs
-# ng serve --host 0.0.0.0
+"""
+Backend
+uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+http://localhost:8000/docs
+
+Frontend
+ng serve --host 0.0.0.0
+"""
+
