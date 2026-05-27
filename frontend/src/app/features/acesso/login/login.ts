@@ -26,21 +26,21 @@ export class Login {
   };
 
   fazerLogin() {
-
     this.apiService.login(this.usuario).subscribe({
       next: (res: LoginResponse) => {
-
-        // ← salva ANTES de navegar
         localStorage.setItem('usuario', JSON.stringify(res.usuario));
 
-        // ← redireciona conforme o tipo
-        if (res.tipo === 'funcionario') { //|| res.tipo === 'admin') {
-          this.router.navigate(['/funcionario/home']);
+        const status = res.usuario.status;
+
+        if (status === 'admin') {
+          this.router.navigate(['/agendamentos']);
+        } else if (status === 'funcionario') {
+          this.router.navigate(['/home']);
         } else {
           this.router.navigate(['/home']);
         }
       },
-      error: (err) => alert('E-mail ou senha incorretos.')
+      error: () => alert('E-mail ou senha incorretos.')
     });
   }
 

@@ -1,11 +1,100 @@
-<app-navbar></app-navbar>
+<app-navbar />
 
-<section class="page-hero">
-  <div class="bg-text">SERVIÇOS</div>
-  <div class="page-content">
-    <span class="section-label">Em desenvolvimento</span>
-    <h1 class="page-title">Serviços</h1>
+<section class="servicos" id="servicos">
+  <div class="section-header">
+    <span class="section-label">O que oferecemos</span>
+    <h2 class="section-title">Nossos Serviços</h2>
     <div class="gold-line"></div>
-    <p class="page-desc">A administração do catálogo de serviços está sendo preparada.<br/>Em breve você poderá editar preços, durações e descrições por aqui.</p>
+
+    @if (isAdmin()) {
+    <button class="btn-admin" (click)="abrirModalNovo()">Novo Serviço</button>
+    }
   </div>
+
+  @if (carregando()) {
+  <div class="estado-info">
+    <span class="estado-texto">Carregando serviços...</span>
+  </div>
+  } @else if (erro()) {
+  <div class="estado-info">
+    <span class="estado-texto erro">{{ erro() }}</span>
+  </div>
+  } @else {
+  <div class="cards-grid">
+    @for (servico of servicos(); track servico.id; let i = $index) {
+    <div class="card" [style.--delay]="(i * 0.08) + 's'">
+
+      @if (isAdmin()) {
+      <div class="card-admin-actions">
+        <button class="btn-icon" (click)="abrirModalEditar(servico)" title="Editar">✏️</button>
+        <button class="btn-icon danger" (click)="deletar(servico.id)" title="Deletar">🗑️</button>
+      </div>
+      }
+
+      <div class="card-icon">
+        <img [src]="'/icons/' + iconesPorTipo[servico.tipo] + '.svg'" [alt]="servico.tipo" width="40" height="40" />
+      </div>
+      <h3 class="card-title">{{ servico.nome }}</h3>
+      <p class="card-desc">{{ servico.descricao }}</p>
+      <div class="card-divider"></div>
+      <div class="card-footer">
+        <div class="card-price-wrap">
+          <span class="card-price-label">A partir de</span>
+          <span class="card-price">{{ formatarPreco(servico.preco) }}</span>
+        </div>
+        <div class="card-meta">
+          <span class="card-duracao">{{ formatarDuracao(servico.duracao_minutos) }}</span>
+          <button type="button" class="btn-agendar" routerLink="/agendamentos">Agendar</button>
+        </div>
+      </div>
+    </div>
+    }
+  </div>
+  }
 </section>
+
+@if (modalAberto()) {
+<div class="modal-overlay" (click)="fecharModal()">
+  <div class="modal" (click)="$event.stopPropagation()">
+    <h3 class="modal-title">{{ editandoId() ? 'Editar Serviço' : 'Novo Serviço' }}</h3>
+
+    <div class="form-group">
+      <label>Nome</label>
+      <input type="text" [(ngModel)]="form.nome" placeholder="Ex: Corte Clássico" />
+    </div>
+
+    <div class="form-group">
+      <label>Descrição</label>
+      <textarea [(ngModel)]="form.descricao" placeholder="Descrição do serviço..." rows="3"></textarea>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Tipo</label>
+        <select [(ngModel)]="form.tipo">
+          @for (tipo of tiposServico; track tipo) {
+          <option [value]="tipo">{{ tipo }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Preço (R$)</label>
+        <input type="number" [(ngModel)]="form.preco" min="0" step="0.01" />
+      </div>
+
+      <div class="form-group">
+        <label>Duração (min)</label>
+        <input type="number" [(ngModel)]="form.duracao_minutos" min="5" step="5" />
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-cancelar" (click)="fecharModal()">Cancelar</button>
+      <button class="btn-salvar" (click)="salvar()" [disabled]="salvando()">
+        {{ salvando() ? 'Salvando...' : 'Salvar' }}
+      </button>
+    </div>
+  </div>
+</div>
+}

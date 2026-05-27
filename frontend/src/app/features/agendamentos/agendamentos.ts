@@ -1,130 +1,197 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, ReactiveFormsModule, Validators, FormsModule } from '@angular/forms';
 
+import { ApiService } from '@core/api-service';
 import { Navbar } from '@shared/components/navbar/navbar';
-import { Agendamento } from '@shared/models/agendamento-model';
+import { Agendamento, AgendamentoCreate } from '@shared/models/agendamento-model';
+import { Servico } from '@shared/models/servicos-model';
+import { ClienteLista } from '@shared/models/cliente-model';
 
 
 @Component({
   selector: 'app-agendamentos',
-  imports: [CommonModule, ReactiveFormsModule, Navbar],
+  imports: [CommonModule, FormsModule,ReactiveFormsModule, Navbar],
   templateUrl: './agendamentos.html',
   styleUrl: './agendamentos.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 
-export class Agendamentos {
-  private fb = inject(FormBuilder);
+export class Agendamentos implements OnInit {
+  private apiService = inject(ApiService);
 
-  readonly servicos = [
-    { nome: 'Corte Clássico', preco: 45 },
-    { nome: 'Barba Completa', preco: 35 },
-    { nome: 'Combo Premium', preco: 95 },
-    { nome: 'Sobrancelha', preco: 20 },
-    { nome: 'Pigmentação', preco: 60 },
-    { nome: 'Hidratação', preco: 40 },
-  ];
+  // estado do usuário
+  isAdmin = computed(() => this.apiService.hasRole('admin'));
+  isFuncionario = computed(() => this.apiService.hasRole('funcionario'));
+  usuario = computed(() => this.apiService.getUsuarioLogado());
 
-  readonly barbeiros = [
-    'Marcos Silva',
-    'Rafael Costa',
-    'João Henrique',
-    'Diego Almeida',
-    'Pedro Martins',
-    'Bruno Carvalho',
-  ];
+  // listas
+  agendamentos = signal<Agendamento[]>([]);
+  barbeiros = signal<ClienteLista[]>([]);
+  servicos = signal<Servico[]>([]);
+  horariosLivres = signal<string[]>([]);
 
-  readonly agendamentos = signal<Agendamento[]>([
-    {
-      id: 1,
-      cliente: 'Lucas Pereira',
-      servico: 'Combo Premium',
-      barbeiro: 'Marcos Silva',
-      data: '2026-05-15',
-      hora: '14:30',
-      preco: 95,
-      status: 'confirmado',
-    },
-    {
-      id: 2,
-      cliente: 'Felipe Marques',
-      servico: 'Corte Clássico',
-      barbeiro: 'Rafael Costa',
-      data: '2026-05-16',
-      hora: '10:00',
-      preco: 45,
-      status: 'pendente',
-    },
-    {
-      id: 3,
-      cliente: 'Gustavo Lima',
-      servico: 'Barba Completa',
-      barbeiro: 'João Henrique',
-      data: '2026-05-14',
-      hora: '17:00',
-      preco: 35,
-      status: 'confirmado',
-    },
-    {
-      id: 4,
-      cliente: 'Rafael Vieira',
-      servico: 'Pigmentação',
-      barbeiro: 'Diego Almeida',
-      data: '2026-05-13',
-      hora: '09:30',
-      preco: 60,
-      status: 'concluido',
-    },
-  ]);
+  // loading
+  carregando = signal(true);
+  carregandoHorarios = signal(false);
+  salvando = signal(false);
 
-  readonly totalSemana = computed(() =>
-    this.agendamentos()
-      .filter((a) => a.status !== 'concluido')
-      .reduce((acc, a) => acc + a.preco, 0),
-  );
+  // modal
+  modalAberto = signal(false);
 
-  readonly form = this.fb.group({
-    cliente: ['', [Validators.required, Validators.minLength(3)]],
-    servico: ['', Validators.required],
-    barbeiro: ['', Validators.required],
-    data: ['', Validators.required],
-    hora: ['', Validators.required],
+  // form
+  form: AgendamentoCreate = this.formVazio();
+  dataSelecionada = '';
+
+  // filtro agenda (funcionario)
+  filtroData   = signal('');
+  filtroStatus = signal('');
+  filtroBarbeiro = signal('');
+
+  readonly statusList = ['Agendado', 'Em andamento', 'Concluído', 'Cancelado'];
+
+  ngOnInit(): void {
+    this.carregarDados();
+  }
+
+  carregarDados(): void {
+    const u = this.usuario();
+    if (!u) return;
+
+    if (this.apiService.hasRole('admin')) {
+      // admin vê todos os agendamentos
+      this.apiService.listarAgendamentos().subscribe({
+        next: (dados) => { this.agendamentos.set(dados); this.carregando.set(false); },
+        error: () => this.carregando.set(false)
+      });
+    } else if (this.apiService.hasRole('funcionario')) {
+      // funcionário vê só os dele como barbeiro
+      this.apiService.listarAgendamentos({ barbeiro_id: u.id }).subscribe({
+        next: (dados) => { this.agendamentos.set(dados); this.carregando.set(false); },
+        error: () => this.carregando.set(false)
+      });
+    } else {
+      // cliente vê os seus
+      this.apiService.listarAgendamentos({ cliente_id: u.id }).subscribe({
+        next: (dados) => { this.agendamentos.set(dados); this.carregando.set(false); },
+        error: () => this.carregando.set(false)
+      });
+    }
+
+    this.apiService.listarBarbeiros().subscribe({
+      next: (dados) => this.barbeiros.set(dados.filter(b => b.funcao === 'barbeiro'))
+    });
+
+    this.apiService.listarServicos().subscribe({
+      next: (dados) => this.servicos.set(dados)
+    });
+  }
+
+  onBarbeiroOuDataMudou(): void {
+    if (!this.form.barbeiro_id || !this.dataSelecionada) return;
+    this.carregandoHorarios.set(true);
+    this.horariosLivres.set([]);
+    this.form.data_hora = '';
+
+    this.apiService.horariosLivres(this.form.barbeiro_id, this.dataSelecionada).subscribe({
+      next: (res) => {
+        this.horariosLivres.set(res.horarios_livres);
+        this.carregandoHorarios.set(false);
+      },
+      error: () => this.carregandoHorarios.set(false)
+    });
+  }
+
+  selecionarHorario(hora: string): void {
+    const data = new Date(`${this.dataSelecionada}T${hora}:00`);
+    const offset = -data.getTimezoneOffset();
+    const sinal = offset >= 0 ? '+' : '-';
+    const hh = String(Math.floor(Math.abs(offset) / 60)).padStart(2, '0');
+    const mm = String(Math.abs(offset) % 60).padStart(2, '0');
+    this.form.data_hora = `${this.dataSelecionada}T${hora}:00${sinal}${hh}:${mm}`;
+  }
+
+  horarioSelecionado(hora: string): boolean {
+    return this.form.data_hora === `${this.dataSelecionada}T${hora}:00`;
+  }
+
+  abrirModal(): void {
+    this.form = this.formVazio();
+    this.form.cliente_id = this.usuario()?.id ?? '';
+    this.dataSelecionada = '';
+    this.horariosLivres.set([]);
+    this.modalAberto.set(true);
+  }
+
+  fecharModal(): void {
+    this.modalAberto.set(false);
+  }
+
+  salvar(): void {
+    if (!this.form.barbeiro_id || !this.form.servico_id || !this.form.data_hora) return;
+    this.salvando.set(true);
+
+    this.apiService.criarAgendamento(this.form).subscribe({
+      next: () => {
+        this.fecharModal();
+        this.carregarDados();
+        this.salvando.set(false);
+      },
+      error: (err) => {
+        alert(err?.error?.detail ?? 'Erro ao agendar.');
+        this.salvando.set(false);
+      }
+    });
+  }
+
+  cancelar(id: string): void {
+    if (!confirm('Deseja cancelar este agendamento?')) return;
+    this.apiService.cancelarAgendamento(id).subscribe({
+      next: () => this.carregarDados()
+    });
+  }
+
+  agendamentosFiltrados = computed(() => {
+    return this.agendamentos()
+      .filter(ag => {
+        const dataOk     = this.filtroData()     ? ag.data_hora.startsWith(this.filtroData())  : true;
+        const statusOk   = this.filtroStatus()   ? ag.status === this.filtroStatus()            : true;
+        const barbeiroOk = this.filtroBarbeiro() ? ag.barbeiro_id === this.filtroBarbeiro()     : true;
+        return dataOk && statusOk && barbeiroOk;
+      })
+      .sort((a, b) => new Date(a.data_hora).getTime() - new Date(b.data_hora).getTime());
   });
 
-  agendar(): void {
-    if (this.form.invalid) {
-      this.form.markAllAsTouched();
-      return;
-    }
-    const v = this.form.getRawValue();
-    const servico = this.servicos.find((s) => s.nome === v.servico);
-    const novo: Agendamento = {
-      id: Date.now(),
-      cliente: v.cliente!,
-      servico: v.servico!,
-      barbeiro: v.barbeiro!,
-      data: v.data!,
-      hora: v.hora!,
-      preco: servico?.preco ?? 0,
-      status: 'pendente',
+  nomeServico(id: string): string {
+    return this.servicos().find(s => s.id === id)?.nome ?? id;
+  }
+
+  formatarPreco(v: number): string {
+    return v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+  }
+
+  formatarDataHora(iso: string): string {
+    return new Date(iso).toLocaleString('pt-BR', {
+      day: '2-digit', month: '2-digit', year: 'numeric',
+      hour: '2-digit', minute: '2-digit'
+    });
+  }
+
+  corStatus(status: string): string {
+    const map: Record<string, string> = {
+      'Agendado': 'status-agendado',
+      'Em andamento': 'status-andamento',
+      'Concluído': 'status-concluido',
+      'Cancelado': 'status-cancelado',
     };
-    this.agendamentos.update((list) => [novo, ...list]);
-    this.form.reset();
+    return map[status] ?? '';
   }
 
-  cancelar(id: number): void {
-    this.agendamentos.update((list) => list.filter((a) => a.id !== id));
+  dataMinima(): string {
+    return new Date().toISOString().split('T')[0];
   }
 
-  confirmar(id: number): void {
-    this.agendamentos.update((list) =>
-      list.map((a) => (a.id === id ? { ...a, status: 'confirmado' } : a)),
-    );
-  }
-
-  formatarData(data: string): string {
-    const [y, m, d] = data.split('-');
-    return `${d}/${m}/${y}`;
+  private formVazio(): AgendamentoCreate {
+    return { barbeiro_id: '', cliente_id: '', servico_id: '', data_hora: '' };
   }
 }

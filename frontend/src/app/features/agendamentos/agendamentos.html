@@ -1,112 +1,142 @@
-<app-navbar></app-navbar>
+<app-navbar />
 
-<section class="page-hero">
-  <div class="bg-text">AGENDA</div>
+<section class="agendamentos">
 
   <div class="section-header">
-    <span class="section-label">Gestão de horários</span>
-    <h1 class="section-title">Agendamentos</h1>
+    <span class="section-label">
+      {{ isAdmin() ? 'Todos os agendamentos' : isFuncionario() ? 'Sua agenda' : 'Seus agendamentos' }}
+    </span>
+    <h2 class="section-title">
+      {{ isAdmin() ? 'Agenda Geral' : isFuncionario() ? 'Agenda de Cortes' : 'Meus Agendamentos' }}
+    </h2>
     <div class="gold-line"></div>
-    <p class="section-desc">Crie, confirme e acompanhe os atendimentos da barbearia.</p>
+
+    @if (!isFuncionario() && !isAdmin()) {
+    <button class="btn-admin" (click)="abrirModal()">+ Novo Agendamento</button>
+    }
   </div>
 
-  <div class="layout">
-    <!-- FORM -->
-    <aside class="form-panel">
-      <header class="panel-header">
-        <h2>Novo agendamento</h2>
-        <p>Preencha os campos abaixo para registrar um atendimento.</p>
-      </header>
+  @if (isFuncionario() || isAdmin()) {
+  <div class="filtros">
+    <div class="filtro-group">
+      <label>Data</label>
+      <input type="date" [ngModel]="filtroData()" (ngModelChange)="filtroData.set($event)" />
+    </div>
+    <div class="filtro-group">
+      <label>Status</label>
+      <select [ngModel]="filtroStatus()" (ngModelChange)="filtroStatus.set($event)">
+        <option value="">Todos</option>
+        @for (s of statusList; track s) {
+        <option [value]="s">{{ s }}</option>
+        }
+      </select>
+    </div>
+    @if (isAdmin()) {
+    <div class="filtro-group">
+      <label>Barbeiro</label>
+      <select [ngModel]="filtroBarbeiro()" (ngModelChange)="filtroBarbeiro.set($event)">
+        <option value="">Todos</option>
+        @for (b of barbeiros(); track b.id) {
+        <option [value]="b.id">{{ b.nome }}</option>
+        }
+      </select>
+    </div>
+    }
+  </div>
+  }
 
-      <form [formGroup]="form" (ngSubmit)="agendar()" class="form">
-        <label class="field">
-          <span class="field-label">Cliente</span>
-          <input type="text" formControlName="cliente" placeholder="Nome completo">
-        </label>
-
-        <label class="field">
-          <span class="field-label">Serviço</span>
-          <select formControlName="servico">
-            <option value="" disabled>Selecione</option>
-            @for (s of servicos; track s.nome) {
-              <option [value]="s.nome">{{ s.nome }} — R$ {{ s.preco }}</option>
-            }
-          </select>
-        </label>
-
-        <label class="field">
-          <span class="field-label">Barbeiro</span>
-          <select formControlName="barbeiro">
-            <option value="" disabled>Selecione</option>
-            @for (b of barbeiros; track b) {
-              <option [value]="b">{{ b }}</option>
-            }
-          </select>
-        </label>
-
-        <div class="field-row">
-          <label class="field">
-            <span class="field-label">Data</span>
-            <input type="date" formControlName="data">
-          </label>
-          <label class="field">
-            <span class="field-label">Hora</span>
-            <input type="time" formControlName="hora">
-          </label>
-        </div>
-
-        <button type="submit" class="btn-primary">Agendar</button>
-      </form>
-
-      <div class="totalizer">
-        <span class="totalizer-label">Receita prevista</span>
-        <span class="totalizer-value">R$ {{ totalSemana() }}</span>
+  @if (carregando()) {
+  <div class="estado-info">
+    <span class="estado-texto">Carregando agendamentos...</span>
+  </div>
+  } @else if (agendamentosFiltrados().length === 0) {
+  <div class="estado-info">
+    <span class="estado-texto">Nenhum agendamento encontrado.</span>
+  </div>
+  } @else {
+  <div class="lista">
+    @for (ag of agendamentosFiltrados(); track ag.id) {
+    <div class="ag-card">
+      <div class="ag-left">
+        <span class="ag-data">{{ formatarDataHora(ag.data_hora) }}</span>
+        <span class="ag-servico">{{ ag.servico_nome }}</span>
+        <span class="ag-pessoa">
+          @if (isAdmin()) {
+          {{ ag.barbeiro_nome }} → {{ ag.cliente_nome }}
+          } @else if (isFuncionario()) {
+          {{ ag.cliente_nome }}
+          } @else {
+          {{ ag.barbeiro_nome }}
+          }
+        </span>
       </div>
-    </aside>
-
-    <!-- LISTA -->
-    <div class="list-panel">
-      <header class="panel-header">
-        <h2>Próximos atendimentos</h2>
-        <p>{{ agendamentos().length }} agendamento(s) registrado(s).</p>
-      </header>
-
-      @if (agendamentos().length === 0) {
-        <div class="empty">Nenhum agendamento cadastrado.</div>
-      }
-
-      <div class="appointments">
-        @for (a of agendamentos(); track a.id; let i = $index) {
-          <article class="appointment" [style.--delay]="(i * 0.05) + 's'" [class.is-done]="a.status === 'concluido'">
-            <div class="appointment-time">
-              <span class="time-hour">{{ a.hora }}</span>
-              <span class="time-date">{{ formatarData(a.data) }}</span>
-            </div>
-            <div class="appointment-info">
-              <h3>{{ a.servico }}</h3>
-              <p>
-                <span class="label">Cliente:</span> {{ a.cliente }}
-                <span class="dot"></span>
-                <span class="label">Barbeiro:</span> {{ a.barbeiro }}
-              </p>
-            </div>
-            <div class="appointment-side">
-              <span class="badge" [class.confirmado]="a.status === 'confirmado'"
-                                  [class.pendente]="a.status === 'pendente'"
-                                  [class.concluido]="a.status === 'concluido'">
-                {{ a.status }}
-              </span>
-              <span class="appointment-price">R$ {{ a.preco }}</span>
-              <div class="appointment-actions">
-                @if (a.status === 'pendente') {
-                  <button type="button" class="btn-mini btn-confirm" (click)="confirmar(a.id)">Confirmar</button>
-                }
-                <button type="button" class="btn-mini btn-cancel" (click)="cancelar(a.id)">Excluir</button>
-              </div>
-            </div>
-          </article>
+      <div class="ag-right">
+        <span class="ag-valor">{{ formatarPreco(ag.valor_total) }}</span>
+        <span class="ag-status" [class]="corStatus(ag.status)">{{ ag.status }}</span>
+        @if (ag.status === 'Agendado' && !isFuncionario() && !isAdmin()) {
+        <button class="btn-cancelar" (click)="cancelar(ag.id)">Cancelar</button>
         }
       </div>
     </div>
+    }
   </div>
+  }
 </section>
+
+@if (modalAberto()) {
+<div class="modal-overlay" (click)="fecharModal()">
+  <div class="modal" (click)="$event.stopPropagation()">
+    <h3 class="modal-title">Novo Agendamento</h3>
+
+    <div class="form-group">
+      <label>Barbeiro</label>
+      <select [(ngModel)]="form.barbeiro_id" (ngModelChange)="onBarbeiroOuDataMudou()">
+        <option value="">Selecione um barbeiro</option>
+        @for (b of barbeiros(); track b.id) {
+        <option [value]="b.id">{{ b.nome }}</option>
+        }
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Serviço</label>
+      <select [(ngModel)]="form.servico_id">
+        <option value="">Selecione um serviço</option>
+        @for (s of servicos(); track s.id) {
+        <option [value]="s.id">{{ s.nome }} — {{ formatarPreco(s.preco) }}</option>
+        }
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Data</label>
+      <input type="date" [(ngModel)]="dataSelecionada" [min]="dataMinima()" (ngModelChange)="onBarbeiroOuDataMudou()" />
+    </div>
+
+    @if (carregandoHorarios()) {
+    <p class="horarios-loading">Buscando horários disponíveis...</p>
+    } @else if (horariosLivres().length > 0) {
+    <div class="form-group">
+      <label>Horário disponível</label>
+      <div class="horarios-grid">
+        @for (hora of horariosLivres(); track hora) {
+        <button type="button" class="btn-horario" [class.selecionado]="horarioSelecionado(hora)"
+          (click)="selecionarHorario(hora)">
+          {{ hora }}
+        </button>
+        }
+      </div>
+    </div>
+    } @else if (dataSelecionada && form.barbeiro_id) {
+    <p class="horarios-vazio">Nenhum horário disponível nesta data.</p>
+    }
+
+    <div class="modal-footer">
+      <button class="btn-cancelar-modal" (click)="fecharModal()">Cancelar</button>
+      <button class="btn-salvar" (click)="salvar()" [disabled]="salvando() || !form.data_hora">
+        {{ salvando() ? 'Agendando...' : 'Confirmar' }}
+      </button>
+    </div>
+  </div>
+</div>
+}
