@@ -13,3 +13,5 @@ export interface LoginResponse {
   tipo: "funcionario" | "cliente";
   usuario: ClienteResponse; // | FuncionarioResponse;
 }
+
+

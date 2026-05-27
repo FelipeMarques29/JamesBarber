@@ -14,6 +14,8 @@ export interface ClienteResponse {
   nome: string;
   email: string;
   telefone: string;
+  status: string;
+  funcao: string | null;
 }
 
 export interface ClienteLista {

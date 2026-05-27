@@ -3,8 +3,11 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
-import { ClienteCreate, ClienteResponse, ClienteLista } from '@shared/models/cliente-model';
+import { Agendamento, AgendamentoCreate, HorariosLivresResponse } from '@shared/models/agendamento-model';
 import { LoginRequest, LoginResponse } from '@shared/models/auth-model';
+import { ClienteCreate, ClienteResponse, ClienteLista } from '@shared/models/cliente-model';
+import { Servico, ServicoCreate, ServicoUpdate } from '@shared/models/servicos-model';
+
 
 @Injectable({
   providedIn: 'root',
@@ -17,21 +20,31 @@ export class ApiService {
 
   constructor(private http: HttpClient) { }
 
+  //LOGIN
   login(dados: LoginRequest): Observable<LoginResponse> {
     return this.http.post<LoginResponse>(`${this.API_URL}/auth/login`, dados);
   }
 
-  isAdmin(): boolean {
-    const dados = localStorage.getItem('usuario');
-    if (!dados) return false;
-
+  //VERIFICA O TIPO DE USUARIO
+  getUsuarioLogado(): any {
     try {
-      const usuario = JSON.parse(dados);
-      return usuario.status === 'admin';
-    } catch (e) {
-      return false;
-    }
+      const u = localStorage.getItem('usuario');
+      return u ? JSON.parse(u) : null;
+    } catch { return null; }
   }
+
+  hasRole(role: 'cliente' | 'funcionario' | 'admin'): boolean {
+    const u = this.getUsuarioLogado();
+    if (!u) return false;
+    if (role === 'funcionario') return u.status === 'funcionario' || u.status === 'admin';
+    return u.status === role;
+  }
+
+  isFuncionario(): boolean {
+    const u = this.getUsuarioLogado();
+    return u?.status === 'funcionario' || u?.status === 'admin';
+  }
+
 
   // Exemplo: Criar um novo cliente
   criarCliente(dados: ClienteCreate): Observable<ClienteResponse> {
@@ -50,6 +63,7 @@ export class ApiService {
     });
   }
 
+  //LISTA FUNCIONARIOS NO DASHBOARD
   listarFuncionarios(): Observable<ClienteLista[]> {
     return this.http.get<ClienteLista[]>(`${this.API_URL}/clientes/`, {
       params: { status: 'funcionario' }
@@ -57,9 +71,14 @@ export class ApiService {
   }
 
   listarBarbeiros(): Observable<ClienteLista[]> {
-    return this.http.get<ClienteLista[]>(`${this.API_URL}/clientes/`);
+    return this.http.get<ClienteLista[]>(`${this.API_URL}/clientes/`, {
+      params: { funcao: 'barbeiro' }
+    });
   }
+  //LISTA FUNCIONARIOS NO DASHBOARD
 
+
+  //DASHBOARD - transformar cliente em funcionario
   promoverCliente(
     id: string,
     status: 'cliente' | 'funcionario' | 'admin',
@@ -69,9 +88,50 @@ export class ApiService {
     if (funcao) params['funcao'] = funcao;
     return this.http.patch(`${this.API_URL}/clientes/${id}/promover`, null, { params});
   }
+  //DASHBOARD - transformar cliente em funcionario
 
-  // Exemplo: Buscar todos os agendamentos
-  listarAgendamentos() {
-    return this.http.get(`${this.API_URL}/agendamentos/`);
+
+  //SERVIÇOS
+  listarServicos(): Observable<Servico[]> {
+    return this.http.get<Servico[]>(`${this.API_URL}/servicos/`);
   }
+
+  criarServico(dados: ServicoCreate): Observable<Servico> {
+    return this.http.post<Servico>(`${this.API_URL}/servicos/`, dados);
+  }
+
+  atualizarServico(id: string, dados: ServicoUpdate): Observable<Servico> {
+    return this.http.patch<Servico>(`${this.API_URL}/servicos/${id}`, dados);
+  }
+
+  deletarServico(id: string): Observable<any> {
+    return this.http.delete(`${this.API_URL}/servicos/${id}`);
+  }
+  //SERVIÇOS
+
+
+  //CRIAR AGENDAMENTO
+  criarAgendamento(dados: AgendamentoCreate): Observable<any> {
+    return this.http.post(`${this.API_URL}/agendamentos/`, dados);
+  }
+
+  listarAgendamentos(filtros?: { barbeiro_id?: string; cliente_id?: string; status?: string }): Observable<Agendamento[]> {
+    const params: Record<string, string> = {};
+    if (filtros?.barbeiro_id) params['barbeiro_id'] = filtros.barbeiro_id;
+    if (filtros?.cliente_id)  params['cliente_id']  = filtros.cliente_id;
+    if (filtros?.status)      params['status']       = filtros.status;
+    return this.http.get<Agendamento[]>(`${this.API_URL}/agendamentos/`, { params });
+  }
+
+  cancelarAgendamento(id: string): Observable<any> {
+    return this.http.delete(`${this.API_URL}/agendamentos/${id}`);
+  }
+
+  horariosLivres(barbeiro_id: string, data: string): Observable<HorariosLivresResponse> {
+    return this.http.get<HorariosLivresResponse>(
+      `${this.API_URL}/agendamentos/barbeiro/${barbeiro_id}/horarios-livres`,
+      { params: { data } }
+    );
+  }
+  //CRIAR AGENDAMENTO
 }
