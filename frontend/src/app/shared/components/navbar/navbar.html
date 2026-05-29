@@ -28,9 +28,15 @@
     <li><a routerLink="/avaliacao" routerLinkActive="active" (click)="fecharMenu()">
         <i class="ti ti-users"></i> Avaliações
       </a></li>
+    <li><a routerLink="/sobre" routerLinkActive="active" (click)="fecharMenu()">
+        <i class="ti ti-info-circle"></i> Sobre
+      </a></li>
     @if (isAdmin()) {
     <li><a routerLink="/dashboard" routerLinkActive="active" (click)="fecharMenu()">
         <i class="ti ti-layout-dashboard"></i> Dashboard
+      </a></li>
+    <li><a routerLink="/admin-dados" routerLinkActive="active" (click)="fecharMenu()">
+        <i class="ti ti-database"></i> Dados
       </a></li>
     }
   </ul>

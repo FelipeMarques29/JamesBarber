@@ -370,3 +370,18 @@
 .filtro-group select {
   color: var(--white);
 }
+
+.dados-section {
+  margin-top: 4rem;
+  padding-top: 2rem;
+  border-top: 1px solid rgba(201, 168, 76, 0.15);
+}
+
+.dados-section-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.6rem;
+  color: var(--gold);
+  text-align: center;
+  margin: 0 0 1.5rem;
+  letter-spacing: 0.05em;
+}

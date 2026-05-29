@@ -1,14 +1,19 @@
-<p>login works!</p>
-
 <div class="auth-container">
   <h2>Acesso JamesBarber</h2>
 
   <input type="email" [(ngModel)]="usuario.email" placeholder="E-mail">
+
   <input type="password" [(ngModel)]="usuario.senha" placeholder="Senha">
+
+  @if (senhaIncorreta()) {
+    <p class="erro-senha">Senha incorreta.</p>
+    <button type="button" class="link-recuperar" (click)="irParaRecuperarSenha()">
+      Esqueceu a senha?
+    </button>
+  }
 
   <div class="actions">
     <button (click)="fazerLogin()">Entrar</button>
-
     <button (click)="irParaCadastro()" class="btn-secondary">Criar Conta</button>
   </div>
 </div>

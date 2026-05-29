@@ -4,6 +4,7 @@ import { FormBuilder, ReactiveFormsModule, Validators, FormsModule } from '@angu
 
 import { ApiService } from '@core/api-service';
 import { Navbar } from '@shared/components/navbar/navbar';
+import { DadosPanel } from '@shared/components/dados-panel/dados-panel';
 import { Agendamento, AgendamentoCreate } from '@shared/models/agendamento-model';
 import { Servico } from '@shared/models/servicos-model';
 import { ClienteLista } from '@shared/models/cliente-model';
@@ -11,7 +12,7 @@ import { ClienteLista } from '@shared/models/cliente-model';
 
 @Component({
   selector: 'app-agendamentos',
-  imports: [CommonModule, FormsModule,ReactiveFormsModule, Navbar],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, Navbar, DadosPanel],
   templateUrl: './agendamentos.html',
   styleUrl: './agendamentos.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
