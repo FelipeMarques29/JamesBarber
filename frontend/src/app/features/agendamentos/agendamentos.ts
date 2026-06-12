@@ -5,6 +5,7 @@ import { FormBuilder, ReactiveFormsModule, Validators, FormsModule } from '@angu
 import { ApiService } from '@core/api-service';
 import { Navbar } from '@shared/components/navbar/navbar';
 import { DadosPanel } from '@shared/components/dados-panel/dados-panel';
+import { MiniCalendario } from '@shared/components/mini-calendario/mini-calendario';
 import { Agendamento, AgendamentoCreate } from '@shared/models/agendamento-model';
 import { Servico } from '@shared/models/servicos-model';
 import { ClienteLista } from '@shared/models/cliente-model';
@@ -12,7 +13,7 @@ import { ClienteLista } from '@shared/models/cliente-model';
 
 @Component({
   selector: 'app-agendamentos',
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, Navbar, DadosPanel],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, Navbar, DadosPanel, MiniCalendario],
   templateUrl: './agendamentos.html',
   styleUrl: './agendamentos.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -51,6 +52,9 @@ export class Agendamentos implements OnInit {
 
   readonly statusList = ['Agendado', 'Em andamento', 'Concluído', 'Cancelado'];
 
+  // todos os horários de trabalho (08:00 → 17:30, mesmos slots do backend)
+  readonly todosHorarios = this.gerarHorarios();
+
   ngOnInit(): void {
     this.carregarDados();
   }
@@ -88,6 +92,11 @@ export class Agendamentos implements OnInit {
     });
   }
 
+  onDataEscolhida(chave: string): void {
+    this.dataSelecionada = chave;
+    this.onBarbeiroOuDataMudou();
+  }
+
   onBarbeiroOuDataMudou(): void {
     if (!this.form.barbeiro_id || !this.dataSelecionada) return;
     this.carregandoHorarios.set(true);
@@ -113,7 +122,21 @@ export class Agendamentos implements OnInit {
   }
 
   horarioSelecionado(hora: string): boolean {
-    return this.form.data_hora === `${this.dataSelecionada}T${hora}:00`;
+    return this.form.data_hora.startsWith(`${this.dataSelecionada}T${hora}:00`);
+  }
+
+  // horário não está entre os livres retornados pelo backend → ocupado
+  horarioOcupado(hora: string): boolean {
+    return !this.horariosLivres().includes(hora);
+  }
+
+  private gerarHorarios(): string[] {
+    const slots: string[] = [];
+    for (let h = 8; h < 18; h++) {
+      const hh = String(h).padStart(2, '0');
+      slots.push(`${hh}:00`, `${hh}:30`);
+    }
+    return slots;
   }
 
   abrirModal(): void {

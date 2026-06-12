@@ -5,6 +5,7 @@ import { Cadastro } from './features/acesso/cadastro/cadastro';
 import { RecuperarSenha } from './features/acesso/recuperar-senha/recuperar-senha';
 import { Home } from './features/home/home';
 import { Agendamentos } from './features/agendamentos/agendamentos';
+import { Calendario } from './features/calendario/calendario';
 import { Avaliacao } from './features/avaliacao/avaliacao';
 import { Sobre } from './features/sobre/sobre';
 import { AdminDados } from './features/admin-dados/admin-dados';
@@ -19,6 +20,7 @@ export const routes: Routes = [
   { path: 'recuperar-senha', component: RecuperarSenha },
   { path: 'home', component: Home },
   { path: 'agendamentos', component: Agendamentos },
+  { path: 'calendario', component: Calendario },
   { path: 'avaliacao', component: Avaliacao },
   { path: 'sobre', component: Sobre },
   { path: 'admin-dados', component: AdminDados },

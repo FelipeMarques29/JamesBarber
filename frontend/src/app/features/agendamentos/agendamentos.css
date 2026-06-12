@@ -294,6 +294,27 @@
   color: var(--black);
 }
 
+.btn-horario.ocupado {
+  background: rgba(239, 68, 68, 0.12);
+  border-color: rgba(239, 68, 68, 0.4);
+  color: #f87171;
+  cursor: not-allowed;
+  text-decoration: line-through;
+}
+
+.btn-horario.ocupado:hover {
+  border-color: rgba(239, 68, 68, 0.4);
+  color: #f87171;
+}
+
+.horarios-legenda {
+  display: block;
+  margin-top: 0.5rem;
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  letter-spacing: 0.05em;
+}
+
 .horarios-loading,
 .horarios-vazio {
   font-size: 0.8rem;
