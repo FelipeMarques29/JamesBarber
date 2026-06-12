@@ -4,7 +4,6 @@ export interface Servico {
   descricao: string | null;
   tipo: TipoServico;
   preco: number;
-  duracao_minutos: number;
   ativo: boolean;
 }
 
@@ -21,7 +20,6 @@ export interface ServicoCreate {
   descricao?: string | null;
   tipo: TipoServico;
   preco: number;
-  duracao_minutos: number;
 }
 
 export interface ServicoUpdate {
@@ -29,6 +27,5 @@ export interface ServicoUpdate {
   descricao?: string | null;
   tipo?: TipoServico;
   preco?: number;
-  duracao_minutos?: number;
   ativo?: boolean;
 }

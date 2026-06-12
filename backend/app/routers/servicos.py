@@ -21,7 +21,6 @@ async def criar_servico(dados: ServicoCreate):
             "descricao": dados.descricao,
             "tipo": dados.tipo.value,
             "preco": dados.preco,
-            "duracao_minutos": dados.duracao_minutos,
             "ativo": True,
             "criado_em": datetime.now()
         })
@@ -55,7 +54,6 @@ async def listar_servicos(apenas_ativos: bool = True):
                 "descricao": dados.get("descricao"),
                 "tipo": dados.get("tipo"),
                 "preco": dados.get("preco"),
-                "duracao_minutos": dados.get("duracao_minutos"),
                 "ativo": dados.get("ativo")
             })
 
@@ -81,7 +79,6 @@ async def buscar_servico(servico_id: str):
             "descricao": dados.get("descricao"),
             "tipo": dados.get("tipo"),
             "preco": dados.get("preco"),
-            "duracao_minutos": dados.get("duracao_minutos"),
             "ativo": dados.get("ativo")
         }
 
