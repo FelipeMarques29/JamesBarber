@@ -1,0 +1,180 @@
+<app-navbar />
+
+<section class="faturamento">
+
+  <div class="section-header">
+    <span class="section-label">Área administrativa</span>
+    <h2 class="section-title">Faturamento</h2>
+    <div class="gold-line"></div>
+  </div>
+
+  @if (carregando()) {
+  <div class="estado-info">
+    <span class="estado-texto">Carregando faturamento...</span>
+  </div>
+  } @else {
+
+  <!-- Filtro de visão -->
+  <div class="fat-filtro">
+    <button type="button" [class.ativo]="visao() === 'diario'" (click)="setVisao('diario')">Diário</button>
+    <button type="button" [class.ativo]="visao() === 'semanal'" (click)="setVisao('semanal')">Semanal</button>
+    <button type="button" [class.ativo]="visao() === 'mensal'" (click)="setVisao('mensal')">Mensal</button>
+  </div>
+
+  @switch (visao()) {
+
+  <!-- ───────── DIÁRIO ───────── -->
+  @case ('diario') {
+  <div class="fat-topo">
+    <div class="fat-picker">
+      <app-mini-calendario [selecionado]="diaRef()" (selecionar)="onDiaEscolhido($event)" />
+    </div>
+    <div class="fat-resumo">
+      <span class="fat-resumo-label">Faturamento do dia</span>
+      <span class="fat-resumo-valor">{{ formatarPreco(totalDia()) }}</span>
+      <span class="fat-resumo-sub">{{ linhasDia().length }} serviço(s) — {{ rotuloDia() }}</span>
+      <button type="button" class="btn-exportar" [disabled]="linhasDia().length === 0" (click)="exportarDia()">
+        <i class="ti ti-file-spreadsheet"></i> Exportar Excel
+      </button>
+    </div>
+  </div>
+
+  @if (linhasDia().length === 0) {
+  <p class="estado-texto">Nenhum serviço neste dia.</p>
+  } @else {
+  <div class="tabela-wrap">
+    <table class="tabela">
+      <thead>
+        <tr>
+          <th>Horário</th>
+          <th>Serviço</th>
+          <th>Cliente</th>
+          <th>Barbeiro</th>
+          <th>Status</th>
+          <th class="col-valor">Valor</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (l of linhasDia(); track $index) {
+        <tr>
+          <td>{{ l.hora }}</td>
+          <td>{{ l.servico }}</td>
+          <td>{{ l.cliente }}</td>
+          <td>{{ l.barbeiro }}</td>
+          <td>{{ l.status }}</td>
+          <td class="col-valor">{{ formatarPreco(l.valor) }}</td>
+        </tr>
+        }
+      </tbody>
+      <tfoot>
+        <tr>
+          <td colspan="5">Total do dia</td>
+          <td class="col-valor">{{ formatarPreco(totalDia()) }}</td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+  }
+  }
+
+  <!-- ───────── SEMANAL ───────── -->
+  @case ('semanal') {
+  <div class="fat-topo">
+    <div class="fat-mes-nav">
+      <button class="fat-nav" type="button" (click)="semanaAnterior()" aria-label="Semana anterior"><span>‹</span></button>
+      <span class="fat-mes-rotulo">{{ rotuloSemana() }}</span>
+      <button class="fat-nav" type="button" (click)="proximaSemana()" aria-label="Próxima semana"><span>›</span></button>
+    </div>
+    <div class="fat-resumo">
+      <span class="fat-resumo-label">Faturamento da semana</span>
+      <span class="fat-resumo-valor">{{ formatarPreco(totalSemana()) }}</span>
+      <span class="fat-resumo-sub">{{ servicosSemana() }} serviço(s) — {{ rotuloSemana() }}</span>
+      <button type="button" class="btn-exportar" [disabled]="servicosSemana() === 0" (click)="exportarSemana()">
+        <i class="ti ti-file-spreadsheet"></i> Exportar Excel
+      </button>
+    </div>
+  </div>
+
+  <div class="tabela-wrap">
+    <table class="tabela">
+      <thead>
+        <tr>
+          <th>Dia</th>
+          <th>Nº de serviços</th>
+          <th class="col-valor">Faturamento</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (l of linhasSemana(); track l.chave) {
+        <tr>
+          <td>{{ l.dia }}</td>
+          <td>{{ l.quantidade }}</td>
+          <td class="col-valor">{{ formatarPreco(l.total) }}</td>
+        </tr>
+        }
+      </tbody>
+      <tfoot>
+        <tr>
+          <td>Total da semana</td>
+          <td>{{ servicosSemana() }}</td>
+          <td class="col-valor">{{ formatarPreco(totalSemana()) }}</td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+  }
+
+  <!-- ───────── MENSAL ───────── -->
+  @case ('mensal') {
+  <div class="fat-topo">
+    <div class="fat-mes-nav">
+      <button class="fat-nav" type="button" (click)="mesAnterior()" aria-label="Mês anterior"><span>‹</span></button>
+      <span class="fat-mes-rotulo">{{ rotuloMes() }}</span>
+      <button class="fat-nav" type="button" (click)="proximoMes()" aria-label="Próximo mês"><span>›</span></button>
+    </div>
+    <div class="fat-resumo">
+      <span class="fat-resumo-label">Faturamento do mês</span>
+      <span class="fat-resumo-valor">{{ formatarPreco(totalMes()) }}</span>
+      <span class="fat-resumo-sub">{{ servicosMes() }} serviço(s) — {{ rotuloMes() }}</span>
+      <button type="button" class="btn-exportar" [disabled]="linhasMes().length === 0" (click)="exportarMes()">
+        <i class="ti ti-file-spreadsheet"></i> Exportar Excel
+      </button>
+    </div>
+  </div>
+
+  @if (linhasMes().length === 0) {
+  <p class="estado-texto">Nenhum serviço neste mês.</p>
+  } @else {
+  <div class="tabela-wrap">
+    <table class="tabela">
+      <thead>
+        <tr>
+          <th>Dia</th>
+          <th>Nº de serviços</th>
+          <th class="col-valor">Faturamento</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (l of linhasMes(); track l.chave) {
+        <tr>
+          <td>{{ l.dia }}</td>
+          <td>{{ l.quantidade }}</td>
+          <td class="col-valor">{{ formatarPreco(l.total) }}</td>
+        </tr>
+        }
+      </tbody>
+      <tfoot>
+        <tr>
+          <td>Total do mês</td>
+          <td>{{ servicosMes() }}</td>
+          <td class="col-valor">{{ formatarPreco(totalMes()) }}</td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+  }
+  }
+
+  }
+  }
+</section>

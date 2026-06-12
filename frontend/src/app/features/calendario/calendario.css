@@ -2,6 +2,12 @@
   padding: 6rem 3rem;
   max-width: 900px;
   margin: 0 auto;
+  transition: max-width 0.3s ease;
+}
+
+/* visão semanal precisa de mais espaço para as 7 colunas */
+.calendario.larga {
+  max-width: 1700px;
 }
 
 .section-header {
@@ -245,7 +251,8 @@
   border: 1px solid rgba(201, 168, 76, 0.1);
   border-radius: 4px;
   min-height: 340px;
-  overflow: hidden;
+  /* visível para o zoom do card no hover não ser cortado */
+  overflow: visible;
 }
 
 .sem-col.hoje {
@@ -299,6 +306,8 @@
 }
 
 .sem-item {
+  position: relative;
+  z-index: 1;
   flex: 1;
   min-width: 0;
   display: flex;
@@ -308,11 +317,30 @@
   border-left: 3px solid var(--gold);
   border-radius: 2px;
   padding: 0.4rem 0.5rem;
+  cursor: default;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+}
+
+/* zoom ao passar o mouse para ler melhor o card pequeno */
+.sem-item:hover {
+  transform: scale(1.6);
+  z-index: 10;
+  background: var(--dark3);
+  border-left-width: 4px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
 }
 
 .sem-item.status-andamento { border-left-color: #60a5fa; }
 .sem-item.status-concluido { border-left-color: #4ade80; }
 .sem-item.status-cancelado { border-left-color: #f87171; }
+
+/* quebra textos longos para não vazarem do card */
+.sem-hora,
+.sem-servico,
+.sem-pessoa {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
 
 .sem-hora {
   font-size: 0.7rem;
@@ -323,11 +351,13 @@
 
 .sem-servico {
   font-size: 0.72rem;
+  line-height: 1.2;
   color: var(--white);
 }
 
 .sem-pessoa {
   font-size: 0.65rem;
+  line-height: 1.2;
   color: var(--text-muted);
 }
 
@@ -428,6 +458,8 @@
   flex-direction: column;
   align-items: flex-end;
   gap: 0.4rem;
+  justify-content: center;
+  align-items: center;
 }
 
 .ag-valor {
@@ -501,5 +533,6 @@
     flex-direction: row;
     flex-wrap: wrap;
     gap: 0.6rem;
+    justify-content: center;
   }
 }

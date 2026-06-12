@@ -12,6 +12,7 @@ import { AdminDados } from './features/admin-dados/admin-dados';
 import { Servicos } from './features/servicos/servicos';
 import { Dashboard } from '@features/dashboard/dashboard';
 import { Funcionarios } from '@features/funcionarios/funcionarios';
+import { Faturamento } from '@features/faturamento/faturamento';
 
 export const routes: Routes = [
   { path: '', component: Login },
@@ -24,6 +25,7 @@ export const routes: Routes = [
   { path: 'avaliacao', component: Avaliacao },
   { path: 'sobre', component: Sobre },
   { path: 'admin-dados', component: AdminDados },
+  { path: 'faturamento', component: Faturamento },
   { path: 'servicos', component: Servicos },
   { path: 'dashboard', component: Dashboard },
   { path: 'funcionarios', component: Funcionarios},
