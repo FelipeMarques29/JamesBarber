@@ -7,6 +7,9 @@ from app.models.agendamentos import AgendamentoCreate, AgendamentoUpdate
 
 router = APIRouter(prefix="/agendamentos", tags=["Agendamentos"])
 
+# horário de Brasília (-03:00) — usado para gerar/exibir horários ao usuário
+BRT = timezone(timedelta(hours=-3))
+
 
 def normalizar_data(dt) -> datetime:
     if dt is None:
@@ -14,6 +17,15 @@ def normalizar_data(dt) -> datetime:
     if hasattr(dt, 'tzinfo') and dt.tzinfo is not None:
         return dt.astimezone(timezone.utc).replace(tzinfo=None)
     return dt
+
+
+def para_brt(dt) -> datetime:
+    """Converte qualquer datetime para horário de Brasília (assume UTC se vier sem tz)."""
+    if dt is None:
+        return None
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=timezone.utc)
+    return dt.astimezone(BRT)
 
 
 @router.post("/")
@@ -36,7 +48,7 @@ async def criar_agendamento(dados: AgendamentoCreate):
             raise HTTPException(status_code=404, detail="Serviço não encontrado.")
         servico = servico_doc.to_dict()
 
-        duracao = servico.get("duracao_minutos", 30)
+        duracao = 30  # todo serviço ocupa um horário fixo de 30 min
         inicio_novo = normalizar_data(dados.data_hora)
         fim_novo = inicio_novo + timedelta(minutes=duracao)
 
@@ -55,7 +67,7 @@ async def criar_agendamento(dados: AgendamentoCreate):
             if inicio_novo < fim_existente and fim_novo > inicio_existente:
                 raise HTTPException(
                     status_code=409,
-                    detail=f"Barbeiro já possui agendamento neste horário. Próximo horário disponível: {fim_existente.strftime('%d/%m/%Y às %H:%M')}."
+                    detail=f"Barbeiro já possui agendamento neste horário. Próximo horário disponível: {para_brt(fim_existente).strftime('%d/%m/%Y às %H:%M')}."
                 )
 
         ref = db.collection("agendamentos").add({
@@ -188,7 +200,7 @@ async def atualizar_agendamento(agendamento_id: str, dados: AgendamentoUpdate):
                 if inicio_novo < fim_existente and fim_novo > inicio_existente:
                     raise HTTPException(
                         status_code=409,
-                        detail=f"Barbeiro já possui agendamento neste horário. Próximo horário disponível: {fim_existente.strftime('%d/%m/%Y às %H:%M')}."
+                        detail=f"Barbeiro já possui agendamento neste horário. Próximo horário disponível: {para_brt(fim_existente).strftime('%d/%m/%Y às %H:%M')}."
                     )
 
         if "status" in campos:
@@ -233,9 +245,9 @@ async def cancelar_agendamento(agendamento_id: str):
 @router.get("/barbeiro/{barbeiro_id}/horarios-livres")
 async def horarios_livres(barbeiro_id: str, data: str):
     try:
-        dia = datetime.strptime(data, "%Y-%m-%d")
-        inicio_dia = dia.replace(hour=8, minute=0, second=0)
-        fim_dia = dia.replace(hour=18, minute=0, second=0)
+        dia = datetime.strptime(data, "%Y-%m-%d").date()
+        inicio_dia = datetime(dia.year, dia.month, dia.day, 8, 0, tzinfo=BRT)
+        fim_dia = datetime(dia.year, dia.month, dia.day, 18, 0, tzinfo=BRT)
 
         agendamentos = (
             db.collection("agendamentos")
@@ -247,9 +259,9 @@ async def horarios_livres(barbeiro_id: str, data: str):
         ocupados: list[tuple[datetime, datetime]] = []
         for doc in agendamentos:
             ag = doc.to_dict()
-            data_hora = normalizar_data(ag.get("data_hora"))
+            data_hora = para_brt(ag.get("data_hora"))
 
-            if data_hora and data_hora.date() == dia.date():
+            if data_hora and data_hora.date() == dia:
                 duracao = ag.get("duracao_minutos", 30)
                 ocupados.append((data_hora, data_hora + timedelta(minutes=duracao)))
 

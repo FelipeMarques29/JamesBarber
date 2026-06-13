@@ -5,6 +5,7 @@ from app.routers import servicos
 from app.routers import agendamentos
 from app.routers import clientes
 from app.routers import auth
+from app.routers import admin
 
 
 app = FastAPI(title="JamesBarber API")
@@ -22,6 +23,7 @@ app.include_router(agendamentos.router)
 app.include_router(auth.router)
 app.include_router(clientes.router)
 app.include_router(servicos.router)
+app.include_router(admin.router)
 
 @app.get("/")
 def home():

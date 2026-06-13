@@ -1,0 +1,94 @@
+<div class="dados-panel">
+  @if (mensagem(); as msg) {
+    <div class="alerta" [class.ok]="msg.tipo === 'ok'" [class.erro]="msg.tipo === 'erro'">
+      {{ msg.texto }}
+    </div>
+  }
+
+  <div class="cards">
+    <article class="card">
+      <h3 class="card-title">Exportar dados</h3>
+      <p class="card-text">
+        Baixa todas as coleções (clientes, serviços e agendamentos) em JSON,
+        empacotados em <strong>.zip</strong>.
+      </p>
+      <button
+        type="button"
+        class="btn-primary"
+        (click)="exportar()"
+        [disabled]="exportando()"
+      >
+        {{ exportando() ? 'Gerando...' : 'Baixar .zip' }}
+      </button>
+    </article>
+
+    <article class="card">
+      <h3 class="card-title">Importar dados</h3>
+      <p class="card-text">
+        Cola uma URL que devolva JSON. Registros vão pra
+        <code>dados_importados</code>.
+      </p>
+
+      <label for="url-importar-panel" class="sr-only">URL</label>
+      <input
+        id="url-importar-panel"
+        type="url"
+        placeholder="https://..."
+        [ngModel]="urlImportar()"
+        (ngModelChange)="urlImportar.set($event)"
+        [disabled]="importando()"
+      >
+
+      <div class="actions">
+        <button
+          type="button"
+          class="btn-primary"
+          (click)="importar()"
+          [disabled]="importando()"
+        >
+          {{ importando() ? 'Importando...' : 'Importar' }}
+        </button>
+        @if (importados().length > 0) {
+          <button type="button" class="btn-ghost" (click)="limpar()">
+            Limpar
+          </button>
+        }
+      </div>
+    </article>
+  </div>
+
+  <div class="tabela-wrap">
+    <h3 class="card-title">Dados importados</h3>
+
+    @if (importados().length === 0) {
+      <p class="vazio">Nenhum dado importado ainda.</p>
+    } @else {
+      <div class="tabela-scroll">
+        <table class="tabela">
+          <thead>
+            <tr>
+              <th>id</th>
+              @for (col of colunas(); track col) {
+                <th>{{ col }}</th>
+              }
+              <th>origem</th>
+              <th>importado em</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (item of importados(); track item.id) {
+              <tr>
+                <td class="mono">{{ item.id }}</td>
+                @for (col of colunas(); track col) {
+                  <td>{{ formatarValor(item[col]) }}</td>
+                }
+                <td class="mono small">{{ item._origem }}</td>
+                <td class="mono small">{{ item._importado_em }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</div>

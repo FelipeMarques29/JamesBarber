@@ -327,6 +327,27 @@
   color: var(--black);
 }
 
+.btn-horario.ocupado {
+  background: rgba(239, 68, 68, 0.12);
+  border-color: rgba(239, 68, 68, 0.4);
+  color: #f87171;
+  cursor: not-allowed;
+  text-decoration: line-through;
+}
+
+.btn-horario.ocupado:hover {
+  border-color: rgba(239, 68, 68, 0.4);
+  color: #f87171;
+}
+
+.horarios-legenda {
+  display: block;
+  margin-top: 0.5rem;
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  letter-spacing: 0.05em;
+}
+
 .horarios-loading,
 .horarios-vazio {
   font-size: 0.75rem;
@@ -418,4 +439,19 @@
   .modal {
     padding: 1.75rem 1.25rem;
   }
+}
+
+.dados-section {
+  margin-top: 4rem;
+  padding-top: 2rem;
+  border-top: 1px solid rgba(201, 168, 76, 0.15);
+}
+
+.dados-section-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.6rem;
+  color: var(--gold);
+  text-align: center;
+  margin: 0 0 1.5rem;
+  letter-spacing: 0.05em;
 }

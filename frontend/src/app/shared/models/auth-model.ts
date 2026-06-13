@@ -14,4 +14,14 @@ export interface LoginResponse {
   usuario: ClienteResponse; // | FuncionarioResponse;
 }
 
+export interface RecuperarSenhaRequest {
+  email: string;
+}
+
+export interface RecuperarSenhaResponse {
+  status: string;
+  senha_temporaria: string;
+  mensagem: string;
+}
+
 

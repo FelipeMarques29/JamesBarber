@@ -1,0 +1,28 @@
+<div class="mini-cal">
+  <div class="mini-cal-head">
+    <button type="button" class="mini-nav" (click)="mesAnterior()" aria-label="Mês anterior">
+      <span>‹</span>
+    </button>
+    <span class="mini-mes">{{ rotuloMes() }}</span>
+    <button type="button" class="mini-nav" (click)="proximoMes()" aria-label="Próximo mês">
+      <span>›</span>
+    </button>
+  </div>
+
+  <div class="mini-grid">
+    @for (ds of diasSemana; track $index) {
+    <div class="mini-weekday">{{ ds }}</div>
+    }
+
+    @for (d of dias(); track d.chave) {
+    <button type="button" class="mini-dia"
+      [class.fora]="!d.dentroDoMes"
+      [class.hoje]="d.hoje"
+      [class.selecionado]="selecionado() === d.chave"
+      [disabled]="!d.dentroDoMes || d.desabilitado"
+      (click)="escolher(d)">
+      {{ d.dia }}
+    </button>
+    }
+  </div>
+</div>

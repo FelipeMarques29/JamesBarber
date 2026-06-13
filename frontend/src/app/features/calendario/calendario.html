@@ -1,0 +1,161 @@
+<app-navbar />
+
+<section class="calendario" [class.larga]="visao() === 'semana'">
+
+  <div class="section-header">
+    <span class="section-label">
+      {{ isAdmin() ? 'Agenda geral' : isFuncionario() ? 'Sua agenda' : 'Seus horários' }}
+    </span>
+    <h2 class="section-title">Calendário</h2>
+    <div class="gold-line"></div>
+  </div>
+
+  @if (carregando()) {
+  <div class="estado-info">
+    <span class="estado-texto">Carregando calendário...</span>
+  </div>
+  } @else {
+
+  <!-- Filtro de visão -->
+  <div class="cal-filtro">
+    <button type="button" [class.ativo]="visao() === 'mes'" (click)="setVisao('mes')">Mês</button>
+    <button type="button" [class.ativo]="visao() === 'semana'" (click)="setVisao('semana')">Semana</button>
+    <button type="button" [class.ativo]="visao() === 'dia'" (click)="setVisao('dia')">Dia</button>
+  </div>
+
+  <!-- Navegação do período -->
+  <div class="cal-toolbar">
+    <button class="cal-nav" type="button" (click)="anterior()" aria-label="Anterior">
+      <span class="cal-seta">‹</span>
+    </button>
+    <span class="cal-mes">{{ rotuloPeriodo() }}</span>
+    <button class="cal-nav" type="button" (click)="proximo()" aria-label="Próximo">
+      <span class="cal-seta">›</span>
+    </button>
+    <button class="cal-hoje" type="button" (click)="irParaHoje()">Hoje</button>
+  </div>
+
+  @switch (visao()) {
+
+  <!-- ───────── VISÃO MÊS ───────── -->
+  @case ('mes') {
+  <div class="cal-grid">
+    @for (ds of diasSemana; track ds) {
+    <div class="cal-weekday">{{ ds }}</div>
+    }
+
+    @for (dia of dias(); track dia.chave) {
+    <button
+      type="button"
+      class="cal-dia"
+      [class.fora]="!dia.dentroDoMes"
+      [class.hoje]="dia.hoje"
+      [class.tem-reserva]="dia.quantidade > 0"
+      [class.selecionado]="diaSelecionado() === dia.chave"
+      [disabled]="!dia.dentroDoMes"
+      (click)="selecionarDia(dia)">
+      <span class="cal-dia-num">{{ dia.dia }}</span>
+      @if (dia.quantidade > 0) {
+      <span class="cal-badge">{{ dia.quantidade }}</span>
+      }
+    </button>
+    }
+  </div>
+
+  @if (diaSelecionado()) {
+  <div class="cal-detalhe">
+    <h3 class="cal-detalhe-titulo">{{ rotuloDiaSelecionado() }}</h3>
+
+    @if (slotsDoDia().length === 0) {
+    <p class="estado-texto">Nenhuma reserva neste dia.</p>
+    } @else {
+    <div class="lista">
+      @for (slot of slotsDoDia(); track slot.hora) {
+      <div class="dia-slot">
+        @for (ag of slot.itens; track ag.id) {
+        <div class="ag-card">
+          <div class="ag-left">
+            <span class="ag-hora">{{ slot.hora }}</span>
+            <span class="ag-servico">{{ ag.servico_nome }}</span>
+            <span class="ag-pessoa">{{ pessoaLabel(ag) }}</span>
+          </div>
+          <div class="ag-right">
+            <span class="ag-valor">{{ formatarPreco(ag.valor_total) }}</span>
+            <span class="ag-status" [class]="corStatus(ag.status)">{{ ag.status }}</span>
+          </div>
+        </div>
+        }
+      </div>
+      }
+    </div>
+    }
+  </div>
+  } @else {
+  <p class="cal-dica">Selecione um dia destacado para ver as reservas.</p>
+  }
+  }
+
+  <!-- ───────── VISÃO SEMANA ───────── -->
+  @case ('semana') {
+  <div class="cal-semana">
+    @for (d of diasDaSemana(); track d.chave) {
+    <div class="sem-col" [class.hoje]="d.hoje">
+      <div class="sem-col-head">
+        <span class="sem-dia-nome">{{ d.nome }}</span>
+        <span class="sem-dia-num">{{ d.numero }}</span>
+      </div>
+      <div class="sem-col-body">
+        @if (d.slots.length === 0) {
+        <span class="sem-vazio">—</span>
+        } @else {
+        @for (slot of d.slots; track slot.hora) {
+        <div class="sem-slot">
+          @for (ag of slot.itens; track ag.id) {
+          <div [class]="'sem-item ' + corStatus(ag.status)">
+            <span class="sem-hora">{{ slot.hora }}</span>
+            <span class="sem-servico">{{ ag.servico_nome }}</span>
+            <span class="sem-pessoa">{{ pessoaLabel(ag) }}</span>
+          </div>
+          }
+        </div>
+        }
+        }
+      </div>
+    </div>
+    }
+  </div>
+  }
+
+  <!-- ───────── VISÃO DIA ───────── -->
+  @case ('dia') {
+  <div class="cal-dia-view">
+    @if (slotsDoDiaRef().length === 0) {
+    <p class="estado-texto">Nenhuma reserva neste dia.</p>
+    } @else {
+    <div class="lista">
+      @for (slot of slotsDoDiaRef(); track slot.hora) {
+      <div class="dia-slot">
+        @for (ag of slot.itens; track ag.id) {
+        <div class="ag-card">
+          <div class="ag-left">
+            <span class="ag-hora">{{ slot.hora }}</span>
+            <span class="ag-servico">{{ ag.servico_nome }}</span>
+            <span class="ag-pessoa">{{ pessoaLabel(ag) }}</span>
+          </div>
+          <div class="ag-right">
+            <span class="ag-valor">{{ formatarPreco(ag.valor_total) }}</span>
+            <span class="ag-status" [class]="corStatus(ag.status)">{{ ag.status }}</span>
+          </div>
+        </div>
+        }
+      </div>
+      }
+    </div>
+    }
+  </div>
+  }
+
+  }
+
+  }
+</section>

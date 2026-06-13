@@ -1,0 +1,45 @@
+<div class="auth-container">
+  <h2>Recuperar senha</h2>
+
+  @if (senhaTemporaria() === null) {
+    <p class="texto">
+      Informe o e-mail cadastrado para gerar uma nova senha temporária.
+    </p>
+
+    <label for="email-recuperar" class="sr-only">E-mail</label>
+    <input
+      id="email-recuperar"
+      type="email"
+      placeholder="E-mail"
+      [ngModel]="email()"
+      (ngModelChange)="email.set($event)"
+      [disabled]="enviando()"
+    >
+
+    @if (erro()) {
+      <p class="erro">{{ erro() }}</p>
+    }
+
+    <div class="actions">
+      <button type="button" (click)="enviar()" [disabled]="enviando()">
+        {{ enviando() ? 'Enviando...' : 'Recuperar' }}
+      </button>
+      <button
+        type="button"
+        class="btn-secondary"
+        (click)="voltarParaLogin()"
+        [disabled]="enviando()"
+      >
+        Voltar
+      </button>
+    </div>
+  } @else {
+    <p class="texto">Sua nova senha temporária:</p>
+    <p class="senha-temp">{{ senhaTemporaria() }}</p>
+    <p class="aviso">Entre com ela e troque assim que possível.</p>
+
+    <div class="actions">
+      <button type="button" (click)="voltarParaLogin()">Ir para login</button>
+    </div>
+  }
+</div>

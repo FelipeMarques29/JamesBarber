@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject } from '@angular/core';
-import { FormsModule} from '@angular/forms';
+import { Component, inject, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { HttpErrorResponse } from '@angular/common/http';
 import { Router, RouterModule } from '@angular/router';
 
 import { ApiService } from '@core/api-service';
@@ -25,7 +26,11 @@ export class Login {
     senha: ''
   };
 
+  readonly senhaIncorreta = signal(false);
+
   fazerLogin() {
+    this.senhaIncorreta.set(false);
+
     this.apiService.login(this.usuario).subscribe({
       next: (res: LoginResponse) => {
         localStorage.setItem('usuario', JSON.stringify(res.usuario));
@@ -40,8 +45,18 @@ export class Login {
           this.router.navigate(['/home']);
         }
       },
-      error: () => alert('E-mail ou senha incorretos.')
+      error: (err: HttpErrorResponse) => {
+        if (err.status === 401) {
+          this.senhaIncorreta.set(true);
+        } else {
+          alert('E-mail ou senha incorretos.');
+        }
+      }
     });
+  }
+
+  irParaRecuperarSenha() {
+    this.router.navigate(['/recuperar-senha']);
   }
 
   irParaCadastro() {
