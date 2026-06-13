@@ -19,9 +19,9 @@ app.add_middleware(
 )
 
 app.include_router(agendamentos.router)
+app.include_router(auth.router)
 app.include_router(clientes.router)
 app.include_router(servicos.router)
-app.include_router(auth.router)
 
 @app.get("/")
 def home():
@@ -29,10 +29,12 @@ def home():
 
 """
 Backend
+python -m venv venv ou py -3.11 -m venv venv (-3.11 seria a sua versao do python. Esse projeto está com a 3.14.2)
+pip install -r requirements.txt
+
 uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 http://localhost:8000/docs
 
 Frontend
 ng serve --host 0.0.0.0
 """
-
