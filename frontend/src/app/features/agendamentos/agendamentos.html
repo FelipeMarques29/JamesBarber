@@ -20,11 +20,13 @@
   <div class="filtros">
     <div class="filtro-group">
       <label>Data</label>
-      <input type="date" [ngModel]="filtroData()" (ngModelChange)="filtroData.set($event)" />
+      <input type="date" [ngModel]="agendamentoService.filtroData()"
+        (ngModelChange)="agendamentoService.filtroData.set($event)" />
     </div>
     <div class="filtro-group">
       <label>Status</label>
-      <select [ngModel]="filtroStatus()" (ngModelChange)="filtroStatus.set($event)">
+      <select [ngModel]="agendamentoService.filtroStatus()"
+        (ngModelChange)="agendamentoService.filtroStatus.set($event)">
         <option value="">Todos</option>
         @for (s of statusList; track s) {
         <option [value]="s">{{ s }}</option>
@@ -34,9 +36,10 @@
     @if (isAdmin()) {
     <div class="filtro-group">
       <label>Barbeiro</label>
-      <select [ngModel]="filtroBarbeiro()" (ngModelChange)="filtroBarbeiro.set($event)">
+      <select [ngModel]="agendamentoService.filtroBarbeiro()"
+        (ngModelChange)="agendamentoService.filtroBarbeiro.set($event)">
         <option value="">Todos</option>
-        @for (b of barbeiros(); track b.id) {
+        @for (b of agendamentoService.barbeiros(); track b.id) {
         <option [value]="b.id">{{ b.nome }}</option>
         }
       </select>
@@ -45,17 +48,17 @@
   </div>
   }
 
-  @if (carregando()) {
+  @if (agendamentoService.carregando()) {
   <div class="estado-info">
     <span class="estado-texto">Carregando agendamentos...</span>
   </div>
-  } @else if (agendamentosFiltrados().length === 0) {
+  } @else if (agendamentoService.agendamentosFiltrados().length === 0) {
   <div class="estado-info">
     <span class="estado-texto">Nenhum agendamento encontrado.</span>
   </div>
   } @else {
   <div class="lista">
-    @for (ag of agendamentosFiltrados(); track ag.id) {
+    @for (ag of agendamentoService.agendamentosFiltrados(); track ag.id) {
     <div class="ag-card">
       <div class="ag-left">
         <span class="ag-data">{{ formatarDataHora(ag.data_hora) }}</span>
@@ -97,7 +100,7 @@
       <label>Barbeiro</label>
       <select [(ngModel)]="form.barbeiro_id" (ngModelChange)="onBarbeiroOuDataMudou()">
         <option value="">Selecione um barbeiro</option>
-        @for (b of barbeiros(); track b.id) {
+        @for (b of agendamentoService.barbeiros(); track b.id) {
         <option [value]="b.id">{{ b.nome }}</option>
         }
       </select>
@@ -107,7 +110,7 @@
       <label>Serviço</label>
       <select [(ngModel)]="form.servico_id">
         <option value="">Selecione um serviço</option>
-        @for (s of servicos(); track s.id) {
+        @for (s of agendamentoService.servicos(); track s.id) {
         <option [value]="s.id">{{ s.nome }} — {{ formatarPreco(s.preco) }}</option>
         }
       </select>
@@ -121,12 +124,15 @@
         (selecionar)="onDataEscolhida($event)" />
     </div>
 
-    @if (carregandoHorarios()) {
+    @if (agendamentoService.carregandoHorarios()) {
     <p class="horarios-loading">Buscando horários disponíveis...</p>
+    } @else if (agendamentoService.horariosLivres().length > 0) {
     } @else if (dataSelecionada && form.barbeiro_id) {
     <div class="form-group">
       <label>Horário</label>
       <div class="horarios-grid">
+        @for (hora of agendamentoService.horariosLivres(); track hora) {
+        <button type="button" class="btn-horario" [class.selecionado]="horarioSelecionado(hora)"
         @for (hora of todosHorarios; track hora) {
         <button type="button" class="btn-horario"
           [class.ocupado]="horarioOcupado(hora)"
@@ -144,8 +150,8 @@
 
     <div class="modal-footer">
       <button class="btn-cancelar-modal" (click)="fecharModal()">Cancelar</button>
-      <button class="btn-salvar" (click)="salvar()" [disabled]="salvando() || !form.data_hora">
-        {{ salvando() ? 'Agendando...' : 'Confirmar' }}
+      <button class="btn-salvar" (click)="salvar()" [disabled]="agendamentoService.salvando() || !form.data_hora">
+        {{ agendamentoService.salvando() ? 'Agendando...' : 'Confirmar' }}
       </button>
     </div>
   </div>
