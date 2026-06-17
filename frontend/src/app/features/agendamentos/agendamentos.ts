@@ -5,7 +5,6 @@ import { FormsModule } from '@angular/forms';
 import { ApiService } from '@core/api-service';
 import { AgendamentoService } from './agendamento-service';
 import { Navbar } from '@shared/components/navbar/navbar';
-import { AgendamentoCreate } from '@shared/models/agendamento-model';
 import { DadosPanel } from '@shared/components/dados-panel/dados-panel';
 import { MiniCalendario } from '@shared/components/mini-calendario/mini-calendario';
 import { Agendamento, AgendamentoCreate } from '@shared/models/agendamento-model';
@@ -15,8 +14,7 @@ import { ClienteLista } from '@shared/models/cliente-model';
 
 @Component({
   selector: 'app-agendamentos',
-  imports: [CommonModule, FormsModule, Navbar],
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, Navbar, DadosPanel, MiniCalendario],
+  imports: [CommonModule, FormsModule, Navbar, DadosPanel, MiniCalendario],
   templateUrl: './agendamentos.html',
   styleUrl: './agendamentos.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -72,7 +70,7 @@ export class Agendamentos implements OnInit {
 
   // horário não está entre os livres retornados pelo backend → ocupado
   horarioOcupado(hora: string): boolean {
-    return !this.horariosLivres().includes(hora);
+    return !this.agendamentoService.horariosLivres().includes(hora);
   }
 
   private gerarHorarios(): string[] {
@@ -145,5 +143,45 @@ export class Agendamentos implements OnInit {
 
   private formVazio(): AgendamentoCreate {
     return { barbeiro_id: '', cliente_id: '', servico_id: '', data_hora: '' };
+  }
+
+  // dia visualizado na grade (admin)
+  diaGrade = signal(new Date().toISOString().split('T')[0]);
+
+  diaAnterior(): void {
+    const d = new Date(this.diaGrade() + 'T12:00:00');
+    d.setDate(d.getDate() - 1);
+    this.diaGrade.set(d.toISOString().split('T')[0]);
+  }
+
+  diaProximo(): void {
+    const d = new Date(this.diaGrade() + 'T12:00:00');
+    d.setDate(d.getDate() + 1);
+    this.diaGrade.set(d.toISOString().split('T')[0]);
+  }
+
+  formatarDiaGrade(): string {
+    const d = new Date(this.diaGrade() + 'T12:00:00');
+    return d.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' });
+  }
+
+  agendamentosDoBarbeiro(barbeiroId: string): Agendamento[] {
+    return this.agendamentoService.agendamentos().filter(ag => {
+      const diaAg = new Date(ag.data_hora).toISOString().split('T')[0];
+      return ag.barbeiro_id === barbeiroId && diaAg === this.diaGrade();
+    });
+  }
+
+  posicaoBloco(ag: Agendamento): { top: string; height: string } {
+    const data = new Date(ag.data_hora);
+    const minutosDesdoInicio = (data.getHours() - 8) * 60 + data.getMinutes();
+    const top = (minutosDesdoInicio / 30) * 3.5;
+    const height = (ag.duracao_minutos / 30) * 3.5;
+    return { top: `${top}rem`, height: `${height}rem` };
+  }
+
+  formatarHora(iso: string): string {
+    const d = new Date(iso);
+    return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
   }
 }

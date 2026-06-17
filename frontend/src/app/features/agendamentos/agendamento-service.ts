@@ -25,14 +25,15 @@ export class AgendamentoService {
   agendamentosFiltrados = computed(() =>
     this.agendamentos()
       .filter(ag => {
-        const dataOk     = this.filtroData()     ? ag.data_hora.startsWith(this.filtroData()) : true;
-        const statusOk   = this.filtroStatus()   ? ag.status === this.filtroStatus()           : true;
-        const barbeiroOk = this.filtroBarbeiro() ? ag.barbeiro_id === this.filtroBarbeiro()    : true;
+        const diaAg = new Date(ag.data_hora).toISOString().split('T')[0];
+
+        const dataOk     = this.filtroData()     ? diaAg === this.filtroData()                : true;
+        const statusOk   = this.filtroStatus()   ? ag.status === this.filtroStatus()          : true;
+        const barbeiroOk = this.filtroBarbeiro() ? ag.barbeiro_id === this.filtroBarbeiro()   : true;
         return dataOk && statusOk && barbeiroOk;
       })
       .sort((a, b) => new Date(a.data_hora).getTime() - new Date(b.data_hora).getTime())
   );
-
   carregarDados(usuarioId: string, role: string): void {
     const params = role === 'admin'       ? {}
                  : role === 'funcionario' ? { barbeiro_id: usuarioId }

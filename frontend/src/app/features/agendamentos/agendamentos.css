@@ -4,11 +4,10 @@
 
 .agendamentos {
   padding: 5rem 2rem 6rem;
-  max-width: 860px;
+  max-width: 1100px;
   margin: 0 auto;
 }
 
-/* ----- cabeçalho ----- */
 .section-header {
   text-align: center;
   margin-bottom: 3rem;
@@ -40,7 +39,6 @@
   opacity: 0.7;
 }
 
-/* ----- botão novo agendamento ----- */
 .btn-admin {
   display: inline-block;
   padding: 0.65rem 1.6rem;
@@ -61,7 +59,7 @@
   color: var(--black);
 }
 
-/* ----- filtros ----- */
+/* ── filtros ── */
 .filtros {
   display: flex;
   gap: 1rem;
@@ -108,7 +106,7 @@
   color: var(--white);
 }
 
-/* ----- estado vazio / loading ----- */
+/* ── estado vazio / loading ── */
 .estado-info {
   text-align: center;
   padding: 5rem 0;
@@ -121,7 +119,7 @@
   text-transform: uppercase;
 }
 
-/* ----- lista ----- */
+/* ── lista (cliente / funcionário) ── */
 .lista {
   display: flex;
   flex-direction: column;
@@ -185,7 +183,6 @@
   color: var(--gold);
 }
 
-/* ----- status ----- */
 .ag-status {
   font-size: 0.58rem;
   font-weight: 700;
@@ -199,7 +196,6 @@
 .status-concluido { color: #4ade80;      border: 1px solid rgba(74, 222, 128, 0.35); }
 .status-cancelado { color: #f87171;      border: 1px solid rgba(248, 113, 113, 0.35); }
 
-/* ----- botão cancelar card ----- */
 .btn-cancelar {
   background: transparent;
   border: none;
@@ -217,6 +213,215 @@
 
 .btn-cancelar:hover {
   border-bottom-color: #f87171;
+}
+
+/* =============================================
+   GRADE ADMIN — estilo Booksy
+   ============================================= */
+
+.grade-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.grade-nav-btn {
+  background: transparent;
+  border: 1px solid rgba(201, 168, 76, 0.3);
+  color: var(--gold);
+  font-size: 1.2rem;
+  width: 2.2rem;
+  height: 2.2rem;
+  cursor: pointer;
+  transition: background 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.grade-nav-btn:hover {
+  background: rgba(201, 168, 76, 0.1);
+}
+
+.grade-nav-dia {
+  font-family: 'Playfair Display', serif;
+  font-size: 1rem;
+  color: var(--white);
+  text-transform: capitalize;
+  letter-spacing: 0.03em;
+}
+
+.grade-wrapper {
+  overflow-x: auto;
+  border: 1px solid rgba(201, 168, 76, 0.1);
+  border-radius: 2px;
+}
+
+.grade-scroll {
+  min-width: 600px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* cabeçalho */
+.grade-head {
+  display: flex;
+  border-bottom: 1px solid rgba(201, 168, 76, 0.15);
+  background: var(--dark2);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.grade-head-corner {
+  width: 3.5rem;
+  flex-shrink: 0;
+  border-right: 1px solid rgba(201, 168, 76, 0.1);
+}
+
+.grade-head-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.75rem 0.5rem;
+  border-right: 1px solid rgba(201, 168, 76, 0.08);
+}
+
+.grade-barbeiro-inicial {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background: rgba(201, 168, 76, 0.12);
+  border: 1px solid rgba(201, 168, 76, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--gold);
+}
+
+.grade-barbeiro-nome {
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* corpo */
+.grade-body {
+  display: flex;
+  position: relative;
+}
+
+/* coluna de horas */
+.grade-horas {
+  width: 3.5rem;
+  flex-shrink: 0;
+  border-right: 1px solid rgba(201, 168, 76, 0.1);
+}
+
+.grade-hora-label {
+  height: 3.5rem;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 0.3rem;
+  font-size: 0.6rem;
+  letter-spacing: 0.08em;
+  color: var(--gold);
+  opacity: 0.5;
+  border-bottom: 1px solid rgba(201, 168, 76, 0.05);
+}
+
+/* coluna de barbeiro */
+.grade-col {
+  flex: 1;
+  position: relative;
+  border-right: 1px solid rgba(201, 168, 76, 0.08);
+  min-width: 140px;
+}
+
+.grade-slot-bg {
+  height: 3.5rem;
+  border-bottom: 1px solid rgba(201, 168, 76, 0.05);
+}
+
+.grade-slot-bg:nth-child(even) {
+  background: rgba(255, 255, 255, 0.01);
+}
+
+/* blocos de agendamento */
+.grade-bloco {
+  position: absolute;
+  left: 4px;
+  right: 4px;
+  border-radius: 3px;
+  padding: 0.3rem 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  overflow: hidden;
+  cursor: pointer;
+  transition: filter 0.15s, transform 0.15s;
+  z-index: 2;
+  min-height: 1.8rem;
+}
+
+.grade-bloco:hover {
+  filter: brightness(1.2);
+  transform: scaleX(0.97);
+}
+
+.grade-bloco--status-agendado {
+  background: rgba(201, 168, 76, 0.18);
+  border-left: 3px solid var(--gold);
+}
+
+.grade-bloco--status-andamento {
+  background: rgba(96, 165, 250, 0.18);
+  border-left: 3px solid #60a5fa;
+}
+
+.grade-bloco--status-concluido {
+  background: rgba(74, 222, 128, 0.18);
+  border-left: 3px solid #4ade80;
+}
+
+.grade-bloco--status-cancelado {
+  background: rgba(248, 113, 113, 0.12);
+  border-left: 3px solid #f87171;
+}
+
+.grade-bloco-hora {
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--gold);
+  opacity: 0.9;
+  flex-shrink: 0;
+}
+
+.grade-bloco-servico {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--white);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-shrink: 0;
+}
+
+.grade-bloco-cliente {
+  font-size: 0.62rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* =============================================
@@ -257,7 +462,6 @@
   margin: 0;
 }
 
-/* ----- form groups ----- */
 .form-group {
   display: flex;
   flex-direction: column;
@@ -295,7 +499,6 @@
   color: var(--white);
 }
 
-/* ----- horários ----- */
 .horarios-grid {
   display: flex;
   flex-wrap: wrap;
@@ -356,7 +559,6 @@
   margin: 0;
 }
 
-/* ----- rodapé modal ----- */
 .modal-footer {
   display: flex;
   justify-content: flex-end;
@@ -408,6 +610,25 @@
 }
 
 /* =============================================
+   DADOS
+   ============================================= */
+
+.dados-section {
+  margin-top: 4rem;
+  padding-top: 2rem;
+  border-top: 1px solid rgba(201, 168, 76, 0.15);
+}
+
+.dados-section-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.6rem;
+  color: var(--gold);
+  text-align: center;
+  margin: 0 0 1.5rem;
+  letter-spacing: 0.05em;
+}
+
+/* =============================================
    RESPONSIVO
    ============================================= */
 
@@ -439,19 +660,12 @@
   .modal {
     padding: 1.75rem 1.25rem;
   }
-}
 
-.dados-section {
-  margin-top: 4rem;
-  padding-top: 2rem;
-  border-top: 1px solid rgba(201, 168, 76, 0.15);
-}
+  .grade-col {
+    min-width: 100px;
+  }
 
-.dados-section-title {
-  font-family: 'Playfair Display', serif;
-  font-size: 1.6rem;
-  color: var(--gold);
-  text-align: center;
-  margin: 0 0 1.5rem;
-  letter-spacing: 0.05em;
+  .grade-bloco-cliente {
+    display: none;
+  }
 }
