@@ -118,28 +118,20 @@
 
     <div class="form-group">
       <label>Data</label>
-      <app-mini-calendario
-        [selecionado]="dataSelecionada"
-        [minData]="dataMinima()"
+      <app-mini-calendario [selecionado]="dataSelecionada" [minData]="dataMinima()"
         (selecionar)="onDataEscolhida($event)" />
     </div>
 
     @if (agendamentoService.carregandoHorarios()) {
     <p class="horarios-loading">Buscando horários disponíveis...</p>
-    } @else if (agendamentoService.horariosLivres().length > 0) {
     } @else if (dataSelecionada && form.barbeiro_id) {
     <div class="form-group">
       <label>Horário</label>
       <div class="horarios-grid">
-        @for (hora of agendamentoService.horariosLivres(); track hora) {
-        <button type="button" class="btn-horario" [class.selecionado]="horarioSelecionado(hora)"
         @for (hora of todosHorarios; track hora) {
-        <button type="button" class="btn-horario"
-          [class.ocupado]="horarioOcupado(hora)"
-          [class.selecionado]="horarioSelecionado(hora)"
-          [disabled]="horarioOcupado(hora)"
-          [title]="horarioOcupado(hora) ? 'Horário ocupado' : 'Horário disponível'"
-          (click)="selecionarHorario(hora)">
+        <button type="button" class="btn-horario" [class.ocupado]="horarioOcupado(hora)"
+          [class.selecionado]="horarioSelecionado(hora)" [disabled]="horarioOcupado(hora)"
+          [title]="horarioOcupado(hora) ? 'Horário ocupado' : 'Disponível'" (click)="selecionarHorario(hora)">
           {{ hora }}
         </button>
         }

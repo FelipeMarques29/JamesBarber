@@ -5,18 +5,16 @@ import { FormsModule } from '@angular/forms';
 import { ApiService } from '@core/api-service';
 import { AgendamentoService } from './agendamento-service';
 import { Navbar } from '@shared/components/navbar/navbar';
-import { AgendamentoCreate } from '@shared/models/agendamento-model';
 import { DadosPanel } from '@shared/components/dados-panel/dados-panel';
 import { MiniCalendario } from '@shared/components/mini-calendario/mini-calendario';
-import { Agendamento, AgendamentoCreate } from '@shared/models/agendamento-model';
+import { AgendamentoCreate } from '@shared/models/agendamento-model';
 import { Servico } from '@shared/models/servicos-model';
 import { ClienteLista } from '@shared/models/cliente-model';
 
 
 @Component({
   selector: 'app-agendamentos',
-  imports: [CommonModule, FormsModule, Navbar],
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, Navbar, DadosPanel, MiniCalendario],
+  imports: [CommonModule, FormsModule, Navbar, DadosPanel, MiniCalendario],
   templateUrl: './agendamentos.html',
   styleUrl: './agendamentos.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -72,7 +70,7 @@ export class Agendamentos implements OnInit {
 
   // horário não está entre os livres retornados pelo backend → ocupado
   horarioOcupado(hora: string): boolean {
-    return !this.horariosLivres().includes(hora);
+    return !this.agendamentoService.horariosLivres().includes(hora);
   }
 
   private gerarHorarios(): string[] {
