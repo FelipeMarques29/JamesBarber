@@ -25,8 +25,7 @@ export class AgendamentoService {
   agendamentosFiltrados = computed(() =>
     this.agendamentos()
       .filter(ag => {
-        const diaAg = new Date(ag.data_hora).toISOString().split('T')[0];
-
+        const diaAg = ag.data_hora.split('T')[0];
         const dataOk     = this.filtroData()     ? diaAg === this.filtroData()                : true;
         const statusOk   = this.filtroStatus()   ? ag.status === this.filtroStatus()          : true;
         const barbeiroOk = this.filtroBarbeiro() ? ag.barbeiro_id === this.filtroBarbeiro()   : true;
@@ -34,6 +33,8 @@ export class AgendamentoService {
       })
       .sort((a, b) => new Date(a.data_hora).getTime() - new Date(b.data_hora).getTime())
   );
+
+
   carregarDados(usuarioId: string, role: string): void {
     const params = role === 'admin'       ? {}
                  : role === 'funcionario' ? { barbeiro_id: usuarioId }
@@ -41,19 +42,23 @@ export class AgendamentoService {
 
     this.carregando.set(true);
 
+
     this.api.listarAgendamentos(params).subscribe({
       next: (dados) => { this.agendamentos.set(dados); this.carregando.set(false); },
       error: ()     => this.carregando.set(false),
     });
 
+
     this.api.listarBarbeiros().subscribe({
       next: (dados) => this.barbeiros.set(dados.filter(b => b.funcao === 'barbeiro')),
     });
+
 
     this.api.listarServicos().subscribe({
       next: (dados) => this.servicos.set(dados),
     });
   }
+
 
   buscarHorarios(barbeiroId: string, data: string): void {
     this.carregandoHorarios.set(true);
@@ -64,6 +69,7 @@ export class AgendamentoService {
     });
   }
 
+
   criar(form: AgendamentoCreate) {
     this.salvando.set(true);
     return this.api.criarAgendamento(form).pipe(
@@ -73,6 +79,7 @@ export class AgendamentoService {
       })
     );
   }
+
 
   cancelar(id: string) {
     return this.api.cancelarAgendamento(id);

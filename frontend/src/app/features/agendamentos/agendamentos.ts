@@ -184,4 +184,13 @@ export class Agendamentos implements OnInit {
     const d = new Date(iso);
     return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
   }
+
+  setFiltroStatus(valor: string): void {
+    this.agendamentoService.filtroStatus.set(valor);
+  }
+
+  setFiltroData(valor: string): void {
+    this.agendamentoService.filtroData.set(valor);
+    if (valor) this.diaGrade.set(valor);
+  }
 }
