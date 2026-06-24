@@ -139,4 +139,10 @@ export class ApiService {
     );
   }
   //CRIAR AGENDAMENTO
+
+  //cache
+  gradeAdmin(data: string): Observable<Agendamento[]> {
+    return this.http.get<Agendamento[]>(`${this.API_URL}/agendamentos/grade`, { params: { data } });
+  }
+  //cache
 }

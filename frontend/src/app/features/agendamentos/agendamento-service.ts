@@ -1,13 +1,14 @@
 import { Injectable, inject, signal, computed } from '@angular/core';
 import { tap } from 'rxjs';
 import { ApiService } from '@core/api-service';
-import { Agendamento, AgendamentoCreate } from '@shared/models/agendamento-model';
+import { Agendamento, AgendamentoCreate, StatusAgendamento } from '@shared/models/agendamento-model';
 import { Servico } from '@shared/models/servicos-model';
 import { ClienteLista } from '@shared/models/cliente-model';
 
 @Injectable({ providedIn: 'root' })
 export class AgendamentoService {
   private api = inject(ApiService);
+
 
   agendamentos   = signal<Agendamento[]>([]);
   barbeiros      = signal<ClienteLista[]>([]);
@@ -31,34 +32,34 @@ export class AgendamentoService {
         const barbeiroOk = this.filtroBarbeiro() ? ag.barbeiro_id === this.filtroBarbeiro()   : true;
         return dataOk && statusOk && barbeiroOk;
       })
-      .sort((a, b) => new Date(a.data_hora).getTime() - new Date(b.data_hora).getTime())
   );
 
 
   carregarDados(usuarioId: string, role: string): void {
     const params = role === 'admin'       ? {}
-                 : role === 'funcionario' ? { barbeiro_id: usuarioId }
-                 :                          { cliente_id: usuarioId };
+                : role === 'funcionario' ? { barbeiro_id: usuarioId }
+                :                          { cliente_id: usuarioId };
 
     this.carregando.set(true);
-
 
     this.api.listarAgendamentos(params).subscribe({
       next: (dados) => { this.agendamentos.set(dados); this.carregando.set(false); },
       error: ()     => this.carregando.set(false),
     });
 
+    // só busca barbeiros e serviços se ainda não tiver
+    if (this.barbeiros().length === 0) {
+      this.api.listarBarbeiros().subscribe({
+        next: (dados) => this.barbeiros.set(dados.filter(b => b.funcao === 'barbeiro')),
+      });
+    }
 
-    this.api.listarBarbeiros().subscribe({
-      next: (dados) => this.barbeiros.set(dados.filter(b => b.funcao === 'barbeiro')),
-    });
-
-
-    this.api.listarServicos().subscribe({
-      next: (dados) => this.servicos.set(dados),
-    });
+    if (this.servicos().length === 0) {
+      this.api.listarServicos().subscribe({
+        next: (dados) => this.servicos.set(dados),
+      });
+    }
   }
-
 
   buscarHorarios(barbeiroId: string, data: string): void {
     this.carregandoHorarios.set(true);
@@ -80,8 +81,13 @@ export class AgendamentoService {
     );
   }
 
-
   cancelar(id: string) {
-    return this.api.cancelarAgendamento(id);
+    return this.api.cancelarAgendamento(id).pipe(
+      tap(() => {
+        this.agendamentos.update(lista =>
+          lista.map(ag => ag.id === id ? { ...ag, status: 'Cancelado' as StatusAgendamento } : ag)
+        );
+      })
+    );
   }
 }
