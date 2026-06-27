@@ -41,16 +41,22 @@ async def criar_cliente(dados: ClienteCreate):
         raise HTTPException(status_code=500, detail=str(e))
     
 @router.get("/")
-async def listar_clientes(email: str | None = None):
-    
+async def listar_clientes(
+    email: str | None = None,
+    status: str | None = None,
+    funcao: str | None = None,
+):
     try:
+        query = db.collection("clientes")
         if email:
-            query = db.collection("clientes").where(filter=FieldFilter("email", "==", email)).stream()
-        else:
-            query = db.collection("clientes").stream()
-            
+            query = query.where(filter=FieldFilter("email", "==", email))
+        if status:
+            query = query.where(filter=FieldFilter("status", "==", status))
+        if funcao:
+            query = query.where(filter=FieldFilter("funcao", "==", funcao))
+
         clientes = []
-        for doc in query:
+        for doc in query.stream():
             dados = doc.to_dict()
             clientes.append({
                 "id": doc.id,
