@@ -11,17 +11,17 @@
     }
   </div>
 
-  @if (carregando()) {
+  @if (servicosService.carregando()) {
   <div class="estado-info">
     <span class="estado-texto">Carregando serviços...</span>
   </div>
-  } @else if (erro()) {
+  } @else if (servicosService.erro()) {
   <div class="estado-info">
-    <span class="estado-texto erro">{{ erro() }}</span>
+    <span class="estado-texto erro">{{ servicosService.erro() }}</span>
   </div>
   } @else {
   <div class="cards-grid">
-    @for (servico of servicos(); track servico.id; let i = $index) {
+    @for (servico of servicosService.servicos(); track servico.id; let i = $index) {
     <div class="card" [style.--delay]="(i * 0.08) + 's'">
 
       @if (isAdmin()) {
@@ -32,7 +32,8 @@
       }
 
       <div class="card-icon">
-        <img [src]="'/icons/' + iconesPorTipo[servico.tipo] + '.svg'" [alt]="servico.tipo" width="40" height="40" />
+        <img [src]="'/icons/' + servicosService.iconesPorTipo[servico.tipo] + '.svg'" [alt]="servico.tipo" width="40"
+          height="40" />
       </div>
       <h3 class="card-title">{{ servico.nome }}</h3>
       <p class="card-desc">{{ servico.descricao }}</p>
@@ -40,7 +41,7 @@
       <div class="card-footer">
         <div class="card-price-wrap">
           <span class="card-price-label">A partir de</span>
-          <span class="card-price">{{ formatarPreco(servico.preco) }}</span>
+          <span class="card-price">{{ servicosService.formatarPreco(servico.preco) }}</span>
         </div>
         <div class="card-meta">
           <button type="button" class="btn-agendar" routerLink="/agendamentos">Agendar</button>
@@ -71,7 +72,7 @@
       <div class="form-group">
         <label>Tipo</label>
         <select [(ngModel)]="form.tipo">
-          @for (tipo of tiposServico; track tipo) {
+          @for (tipo of servicosService.tiposServico; track tipo) {
           <option [value]="tipo">{{ tipo }}</option>
           }
         </select>

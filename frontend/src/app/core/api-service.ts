@@ -120,11 +120,17 @@ export class ApiService {
     return this.http.post(`${this.API_URL}/agendamentos/`, dados);
   }
 
-  listarAgendamentos(filtros?: { barbeiro_id?: string; cliente_id?: string; status?: string }): Observable<Agendamento[]> {
+  listarAgendamentos(filtros?: {
+    barbeiro_id?: string;
+    cliente_id?: string;
+    status?: string;
+    atualizado_apos?: string;
+  }): Observable<Agendamento[]> {
     const params: Record<string, string> = {};
-    if (filtros?.barbeiro_id) params['barbeiro_id'] = filtros.barbeiro_id;
-    if (filtros?.cliente_id)  params['cliente_id']  = filtros.cliente_id;
-    if (filtros?.status)      params['status']       = filtros.status;
+    if (filtros?.barbeiro_id)     params['barbeiro_id']     = filtros.barbeiro_id;
+    if (filtros?.cliente_id)      params['cliente_id']      = filtros.cliente_id;
+    if (filtros?.status)          params['status']          = filtros.status;
+    if (filtros?.atualizado_apos) params['atualizado_apos'] = filtros.atualizado_apos;
     return this.http.get<Agendamento[]>(`${this.API_URL}/agendamentos/`, { params });
   }
 
@@ -139,4 +145,10 @@ export class ApiService {
     );
   }
   //CRIAR AGENDAMENTO
+
+  //cache
+  gradeAdmin(data: string): Observable<Agendamento[]> {
+    return this.http.get<Agendamento[]>(`${this.API_URL}/agendamentos/grade`, { params: { data } });
+  }
+  //cache
 }

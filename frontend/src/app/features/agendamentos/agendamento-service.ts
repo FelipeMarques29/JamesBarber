@@ -1,13 +1,14 @@
 import { Injectable, inject, signal, computed } from '@angular/core';
 import { tap } from 'rxjs';
 import { ApiService } from '@core/api-service';
-import { Agendamento, AgendamentoCreate } from '@shared/models/agendamento-model';
+import { Agendamento, AgendamentoCreate, StatusAgendamento } from '@shared/models/agendamento-model';
 import { Servico } from '@shared/models/servicos-model';
 import { ClienteLista } from '@shared/models/cliente-model';
 
 @Injectable({ providedIn: 'root' })
 export class AgendamentoService {
   private api = inject(ApiService);
+  private readonly CACHE_TTL_MS = 60_000; // 1 min, ajuste como quiser
 
   agendamentos   = signal<Agendamento[]>([]);
   barbeiros      = signal<ClienteLista[]>([]);
@@ -22,43 +23,75 @@ export class AgendamentoService {
   filtroStatus   = signal('');
   filtroBarbeiro = signal('');
 
+  private contextoAtual: string | null = null;
+  private ultimaSincronizacao = signal<string | null>(null);
+
   agendamentosFiltrados = computed(() =>
     this.agendamentos()
       .filter(ag => {
         const diaAg = ag.data_hora.split('T')[0];
-        const dataOk     = this.filtroData()     ? diaAg === this.filtroData()                : true;
+        const dataOk     = this.filtroData()     ? diaAg === this.filtroData()               : true;
         const statusOk   = this.filtroStatus()   ? ag.status === this.filtroStatus()          : true;
         const barbeiroOk = this.filtroBarbeiro() ? ag.barbeiro_id === this.filtroBarbeiro()   : true;
         return dataOk && statusOk && barbeiroOk;
       })
-      .sort((a, b) => new Date(a.data_hora).getTime() - new Date(b.data_hora).getTime())
   );
 
+  carregarDados(usuarioId: string, role: string, forcar = false): void {
+    const contexto = `${role}:${usuarioId}`;
+    const mudouContexto = this.contextoAtual !== contexto;
 
-  carregarDados(usuarioId: string, role: string): void {
-    const params = role === 'admin'       ? {}
-                 : role === 'funcionario' ? { barbeiro_id: usuarioId }
-                 :                          { cliente_id: usuarioId };
+    if (mudouContexto) {
+      // trocou de usuário/role -> cache antigo não serve mais
+      this.contextoAtual = contexto;
+      this.ultimaSincronizacao.set(null);
+      this.agendamentos.set([]);
+    }
 
-    this.carregando.set(true);
+    const ultimaSync = this.ultimaSincronizacao();
 
+    // mesmo contexto + cache ainda fresco -> não bate na API
+    if (!forcar && !mudouContexto && ultimaSync) {
+      const idadeMs = Date.now() - new Date(ultimaSync).getTime();
+      if (idadeMs < this.CACHE_TTL_MS) return;
+    }
+
+    const paramsBase = role === 'admin'        ? {}
+                      : role === 'funcionario' ? { barbeiro_id: usuarioId }
+                      :                          { cliente_id: usuarioId };
+
+    const incremental = !mudouContexto && !!ultimaSync;
+    const params = incremental ? { ...paramsBase, atualizado_apos: ultimaSync } : paramsBase;
+
+    this.carregando.set(!incremental); // loading visual só na carga cheia, não no refresh incremental
 
     this.api.listarAgendamentos(params).subscribe({
-      next: (dados) => { this.agendamentos.set(dados); this.carregando.set(false); },
-      error: ()     => this.carregando.set(false),
+      next: (dados) => {
+        if (incremental) {
+          const mapa = new Map(this.agendamentos().map(a => [a.id, a]));
+          for (const ag of dados) mapa.set(ag.id, ag);
+          this.agendamentos.set(Array.from(mapa.values()));
+        } else {
+          this.agendamentos.set(dados);
+        }
+        this.ultimaSincronizacao.set(new Date().toISOString());
+        this.carregando.set(false);
+      },
+      error: () => this.carregando.set(false),
     });
 
+    if (this.barbeiros().length === 0) {
+      this.api.listarBarbeiros().subscribe({
+        next: (dados) => this.barbeiros.set(dados.filter(b => b.funcao === 'barbeiro')),
+      });
+    }
 
-    this.api.listarBarbeiros().subscribe({
-      next: (dados) => this.barbeiros.set(dados.filter(b => b.funcao === 'barbeiro')),
-    });
-
-
-    this.api.listarServicos().subscribe({
-      next: (dados) => this.servicos.set(dados),
-    });
+    if (this.servicos().length === 0) {
+      this.api.listarServicos().subscribe({
+        next: (dados) => this.servicos.set(dados),
+      });
+    }
   }
-
 
   buscarHorarios(barbeiroId: string, data: string): void {
     this.carregandoHorarios.set(true);
@@ -68,7 +101,6 @@ export class AgendamentoService {
       error: ()   => this.carregandoHorarios.set(false),
     });
   }
-
 
   criar(form: AgendamentoCreate) {
     this.salvando.set(true);
@@ -80,8 +112,13 @@ export class AgendamentoService {
     );
   }
 
-
   cancelar(id: string) {
-    return this.api.cancelarAgendamento(id);
+    return this.api.cancelarAgendamento(id).pipe(
+      tap(() => {
+        this.agendamentos.update(lista =>
+          lista.map(ag => ag.id === id ? { ...ag, status: 'Cancelado' as StatusAgendamento } : ag)
+        );
+      })
+    );
   }
 }
