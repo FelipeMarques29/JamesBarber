@@ -38,10 +38,14 @@ export class Agendamentos implements OnInit {
   readonly todosHorarios = this.gerarHorarios();
 
   ngOnInit(): void {
+    this.recarregar();
+  }
+
+  private recarregar(forcar = false): void {
     const u = this.usuario();
     if (!u) return;
     const role = this.isAdmin() ? 'admin' : this.isFuncionario() ? 'funcionario' : 'cliente';
-    this.agendamentoService.carregarDados(u.id, role);
+    this.agendamentoService.carregarDados(u.id, role, forcar);
   }
 
   onDataEscolhida(chave: string): void {
@@ -99,7 +103,7 @@ export class Agendamentos implements OnInit {
     this.agendamentoService.criar(this.form).subscribe({
       next: () => {
         this.fecharModal();
-        this.ngOnInit();
+        this.recarregar(true); // força, mas busca só o delta (incremental)
       },
       error: (err) => alert(err?.error?.detail ?? 'Erro ao agendar.'),
     });
@@ -107,8 +111,9 @@ export class Agendamentos implements OnInit {
 
   cancelar(id: string): void {
     if (!confirm('Deseja cancelar este agendamento?')) return;
+    // o service já atualiza o status localmente (update otimista) -> não precisa recarregar
     this.agendamentoService.cancelar(id).subscribe({
-      next: () => this.ngOnInit(),
+      error: () => alert('Erro ao cancelar.'),
     });
   }
 

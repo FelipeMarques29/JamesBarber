@@ -39,7 +39,7 @@ async def criar_agendamento(dados: AgendamentoCreate):
 
         if not barbeiro_doc.exists or not cliente_doc.exists or not servico_doc.exists:
             raise HTTPException(status_code=404, detail="Dados de cadastro não encontrados.")
-        
+
         barbeiro = barbeiro_doc.to_dict()
         cliente = cliente_doc.to_dict()
         servico = servico_doc.to_dict()
@@ -66,6 +66,8 @@ async def criar_agendamento(dados: AgendamentoCreate):
             if inicio_novo < fim_existente and fim_novo > inicio_existente:
                 raise HTTPException(status_code=409, detail="Conflito de horário.")
 
+        agora = datetime.now(timezone.utc)
+
         # Inserção com dados desnormalizados para evitar leituras futuras
         ref = db.collection("agendamentos").add({
             "barbeiro_id": dados.barbeiro_id,
@@ -76,10 +78,11 @@ async def criar_agendamento(dados: AgendamentoCreate):
             "servico_nome": servico.get("nome"),
             "duracao_minutos": duracao,
             "data_hora": dados.data_hora,
-            "data_string": inicio_novo.strftime("%Y-%m-%d"), # Novo campo para busca otimizada
+            "data_string": inicio_novo.strftime("%Y-%m-%d"),  # Novo campo para busca otimizada
             "valor_total": servico.get("preco"),
             "status": "Agendado",
-            "criado_em": datetime.now()
+            "criado_em": agora,
+            "atualizado_em": agora,  # necessário para o filtro incremental (atualizado_apos)
         })
 
         return {"id": ref[1].id, "status": "Agendamento criado!"}
@@ -95,18 +98,25 @@ async def listar_agendamentos(
     cliente_id: str | None = None,
     status: str | None = None,
     limite: int = 50,
-    dias: int = 30
+    dias: int = 30,
+    atualizado_apos: str | None = None,
 ):
     try:
-        corte = datetime.now(tz=timezone.utc) - timedelta(days=dias)
-        query = db.collection("agendamentos").where(filter=FieldFilter("data_hora", ">=", corte))
+        query = db.collection("agendamentos")
+
+        if atualizado_apos:
+            corte = datetime.fromisoformat(atualizado_apos)
+            query = query.where(filter=FieldFilter("atualizado_em", ">=", corte))
+        else:
+            corte = datetime.now(tz=timezone.utc) - timedelta(days=dias)
+            query = query.where(filter=FieldFilter("data_hora", ">=", corte))
 
         if barbeiro_id: query = query.where(filter=FieldFilter("barbeiro_id", "==", barbeiro_id))
         if cliente_id: query = query.where(filter=FieldFilter("cliente_id", "==", cliente_id))
         if status: query = query.where(filter=FieldFilter("status", "==", status))
 
-        agendamentos = [ {**doc.to_dict(), "id": doc.id} for doc in query.stream() ]
-        
+        agendamentos = [{**doc.to_dict(), "id": doc.id} for doc in query.stream()]
+
         # Ordenação em memória para evitar índices compostos excessivos
         agendamentos.sort(key=lambda x: x.get("criado_em") or datetime.min, reverse=True)
 
@@ -127,7 +137,7 @@ async def atualizar_agendamento(agendamento_id: str, dados: AgendamentoUpdate):
     # Lógica similar à de criação, mantendo a consistência dos dados desnormalizados
     ref = db.collection("agendamentos").document(agendamento_id)
     campos = dados.model_dump(exclude_none=True)
-    campos["atualizado_em"] = datetime.now()
+    campos["atualizado_em"] = datetime.now(timezone.utc)
     ref.update(campos)
     return {"mensagem": "Atualizado!"}
 
@@ -135,7 +145,7 @@ async def atualizar_agendamento(agendamento_id: str, dados: AgendamentoUpdate):
 @router.delete("/{agendamento_id}")
 async def cancelar_agendamento(agendamento_id: str):
     ref = db.collection("agendamentos").document(agendamento_id)
-    ref.update({"status": "Cancelado", "atualizado_em": datetime.now()})
+    ref.update({"status": "Cancelado", "atualizado_em": datetime.now(timezone.utc)})
     return {"mensagem": "Cancelado!"}
 
 

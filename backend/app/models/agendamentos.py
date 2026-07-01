@@ -27,7 +27,7 @@ class AgendamentoResponse(BaseModel):
     status: StatusAgendamento
     valor_total: float
     criado_em: datetime
-
+    atualizado_em: Optional[datetime] = None
 
 class AgendamentoUpdate(BaseModel):
     status: Optional[StatusAgendamento] = None

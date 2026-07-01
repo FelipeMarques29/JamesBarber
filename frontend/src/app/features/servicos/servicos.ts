@@ -1,12 +1,13 @@
+// servicos.ts
 import { Component, OnInit, signal, inject, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-// import { HttpClient } from '@angular/common/http';
 
-import { Servico, ServicoCreate, ServicoUpdate, TipoServico } from '@shared/models/servicos-model';
+import { Servico, ServicoCreate } from '@shared/models/servicos-model';
 import { Navbar } from '@shared/components/navbar/navbar';
 import { ApiService } from '@core/api-service';
+import { ServicosService } from './servicos-service';
 
 @Component({
   selector: 'app-servicos',
@@ -14,12 +15,9 @@ import { ApiService } from '@core/api-service';
   templateUrl: './servicos.html',
   styleUrl: './servicos.css',
 })
-
 export class Servicos implements OnInit {
-
-  servicos = signal<Servico[]>([]);
-  carregando = signal(true);
-  erro = signal<string | null>(null);
+  private apiService = inject(ApiService);
+  protected servicosService = inject(ServicosService);
 
   modalAberto = signal(false);
   salvando = signal(false);
@@ -27,40 +25,11 @@ export class Servicos implements OnInit {
 
   form: ServicoCreate = this.formVazio();
 
-  readonly tiposServico: TipoServico[] = [
-    'corte', 'barba', 'corte_barba', 'hidratacao', 'coloracao', 'sobrancelha'
-  ];
-
-  readonly iconesPorTipo: Record<TipoServico, string> = {
-    corte: 'scissors',
-    barba: 'razor',
-    corte_barba: 'scissors',
-    hidratacao: 'bottle',
-    coloracao: 'barber-pole',
-    sobrancelha: 'eyebrow'
-  };
-
-  private apiService = inject(ApiService);
-
   isAdmin = computed(() => this.apiService.hasRole('admin'));
   isFuncionario = computed(() => this.apiService.hasRole('funcionario'));
 
   ngOnInit(): void {
-    this.carregarServicos();
-  }
-
-  carregarServicos(): void {
-    this.carregando.set(true);
-    this.apiService.listarServicos().subscribe({
-      next: (dados: Servico[]) => {
-        this.servicos.set(dados);
-        this.carregando.set(false);
-      },
-      error: () => {
-        this.erro.set('Não foi possível carregar os serviços.');
-        this.carregando.set(false);
-      }
-    });
+    this.servicosService.carregarServicos();
   }
 
   abrirModalNovo(): void {
@@ -91,13 +60,12 @@ export class Servicos implements OnInit {
     const id = this.editandoId();
 
     const req = id
-      ? this.apiService.atualizarServico(id, this.form)
-      : this.apiService.criarServico(this.form);
+      ? this.servicosService.atualizarServico(id, this.form)
+      : this.servicosService.criarServico(this.form);
 
     req.subscribe({
       next: () => {
         this.fecharModal();
-        this.carregarServicos();
         this.salvando.set(false);
       },
       error: () => {
@@ -108,13 +76,7 @@ export class Servicos implements OnInit {
 
   deletar(id: string): void {
     if (!confirm('Deseja deletar este serviço?')) return;
-    this.apiService.deletarServico(id).subscribe({
-      next: () => this.carregarServicos()
-    });
-  }
-
-  formatarPreco(preco: number): string {
-    return preco.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    this.servicosService.deletarServico(id).subscribe();
   }
 
   private formVazio(): ServicoCreate {
