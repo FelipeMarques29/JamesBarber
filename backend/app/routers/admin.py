@@ -2,15 +2,16 @@
 import io
 import json
 import zipfile
-from datetime import datetime, date
-from typing import Any
-
 import requests
+
+from datetime import datetime, date
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import StreamingResponse
+from typing import Any
 from pydantic import BaseModel, HttpUrl
 
 from app.db.database import db
+
 
 router = APIRouter(prefix="/admin", tags=["Admin"])
 

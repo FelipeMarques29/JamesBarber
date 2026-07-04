@@ -26,16 +26,24 @@ export class AgendamentoService {
   private contextoAtual: string | null = null;
   private ultimaSincronizacao = signal<string | null>(null);
 
-  agendamentosFiltrados = computed(() =>
-    this.agendamentos()
-      .filter(ag => {
-        const diaAg = ag.data_hora.split('T')[0];
-        const dataOk     = this.filtroData()     ? diaAg === this.filtroData()               : true;
-        const statusOk   = this.filtroStatus()   ? ag.status === this.filtroStatus()          : true;
-        const barbeiroOk = this.filtroBarbeiro() ? ag.barbeiro_id === this.filtroBarbeiro()   : true;
-        return dataOk && statusOk && barbeiroOk;
-      })
-  );
+  agendamentosFiltrados = computed(() => {
+    // 1. Primeiro fazemos o filtro normal
+    const filtrados = this.agendamentos().filter(ag => {
+      const diaAg = ag.data_hora.split('T')[0];
+      const dataOk     = this.filtroData()     ? diaAg === this.filtroData()               : true;
+      const statusOk   = this.filtroStatus()   ? ag.status === this.filtroStatus()         : true;
+      const barbeiroOk = this.filtroBarbeiro() ? ag.barbeiro_id === this.filtroBarbeiro()  : true;
+
+      return dataOk && statusOk && barbeiroOk;
+    });
+
+    // 2. Depois garantimos a ordenação decrescente (do mais recente para o mais antigo)
+    return filtrados.sort((a, b) => {
+      const tempoA = new Date(a.data_hora).getTime();
+      const tempoB = new Date(b.data_hora).getTime();
+      return tempoB - tempoA;
+    });
+  });
 
   carregarDados(usuarioId: string, role: string, forcar = false): void {
     const contexto = `${role}:${usuarioId}`;
@@ -56,9 +64,39 @@ export class AgendamentoService {
       if (idadeMs < this.CACHE_TTL_MS) return;
     }
 
-    const paramsBase = role === 'admin'        ? {}
-                      : role === 'funcionario' ? { barbeiro_id: usuarioId }
-                      :                          { cliente_id: usuarioId };
+    // ==========================================
+    // NOVA LÓGICA DE PARÂMETROS
+    // ==========================================
+    let paramsBase: any = {};
+
+    if (role === 'admin') {
+      paramsBase = {};
+    } else if (role === 'funcionario') {
+      // 1. Pega a data selecionada no filtro da tela, ou usa o dia de hoje
+      // O 'T12:00:00' evita bugs de fuso horário onde o JS volta 1 dia para trás
+      const dataAlvo = this.filtroData() ? new Date(this.filtroData() + 'T12:00:00') : new Date();
+
+      // 2. Define 00:00:00 e 23:59:59 daquele dia
+      const inicioDia = new Date(dataAlvo);
+      inicioDia.setHours(0, 0, 0, 0);
+
+      const fimDia = new Date(dataAlvo);
+      fimDia.setHours(23, 59, 59, 999);
+
+      paramsBase = {
+        barbeiro_id: usuarioId,
+        data_inicio: inicioDia.toISOString(),
+        data_fim: fimDia.toISOString(),
+        limite: 100 // Força um limite alto para garantir que cabem todos os cortes do dia
+      };
+    } else {
+      // Cliente: Traz apenas o histórico dos últimos 3
+      paramsBase = {
+        cliente_id: usuarioId,
+        limite: 3
+      };
+    }
+    // ==========================================
 
     const incremental = !mudouContexto && !!ultimaSync;
     const params = incremental ? { ...paramsBase, atualizado_apos: ultimaSync } : paramsBase;

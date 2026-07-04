@@ -93,9 +93,10 @@
     <span class="estado-texto">Nenhum agendamento encontrado.</span>
   </div>
 
-  } @else {
+  }
+  @else {
   <div class="lista">
-    @for (ag of agendamentoService.agendamentosFiltrados() | slice:0:3; track ag.id) {
+    @for (ag of agendamentoService.agendamentosFiltrados(); track ag.id) {
     <div class="ag-card">
       <div class="ag-left">
         <span class="ag-data">{{ formatarDataHora(ag.data_hora) }}</span>
