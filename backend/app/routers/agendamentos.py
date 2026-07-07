@@ -1,9 +1,10 @@
 from datetime import datetime, timedelta, timezone
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from google.cloud.firestore import FieldFilter
 from google.cloud import firestore
 
 from app.db.database import db
+from app.utils.auth import obter_usuario_atual
 from app.models.agendamentos import AgendamentoCreate, AgendamentoUpdate
 
 router = APIRouter(prefix="/agendamentos", tags=["Agendamentos"])
@@ -30,7 +31,7 @@ def para_brt(dt) -> datetime:
 
 
 @router.post("/")
-async def criar_agendamento(dados: AgendamentoCreate):
+async def criar_agendamento(dados: AgendamentoCreate, user: dict = Depends(obter_usuario_atual)):
     try:
         # Busca única para validação
         barbeiro_doc = db.collection("clientes").document(dados.barbeiro_id).get()
@@ -101,6 +102,7 @@ async def listar_agendamentos(
     data_inicio: str | None = None,  # Frontend envia a data de corte se precisar
     data_fim: str | None = None,     # Frontend envia o teto (útil para "agendamentos do dia")
     atualizado_apos: str | None = None,
+    user: dict = Depends(obter_usuario_atual),
 ):
     try:
         query = db.collection("agendamentos")
@@ -142,14 +144,14 @@ async def listar_agendamentos(
 
 
 @router.get("/{agendamento_id}")
-async def buscar_agendamento(agendamento_id: str):
+async def buscar_agendamento(agendamento_id: str, user: dict = Depends(obter_usuario_atual)):
     doc = db.collection("agendamentos").document(agendamento_id).get()
     if not doc.exists: raise HTTPException(status_code=404, detail="Não encontrado.")
     return {**doc.to_dict(), "id": doc.id}
 
 
 @router.patch("/{agendamento_id}")
-async def atualizar_agendamento(agendamento_id: str, dados: AgendamentoUpdate):
+async def atualizar_agendamento(agendamento_id: str, dados: AgendamentoUpdate, user: dict = Depends(obter_usuario_atual)):
     # Lógica similar à de criação, mantendo a consistência dos dados desnormalizados
     ref = db.collection("agendamentos").document(agendamento_id)
     campos = dados.model_dump(exclude_none=True)
@@ -159,7 +161,7 @@ async def atualizar_agendamento(agendamento_id: str, dados: AgendamentoUpdate):
 
 
 @router.delete("/{agendamento_id}")
-async def cancelar_agendamento(agendamento_id: str):
+async def cancelar_agendamento(agendamento_id: str, user: dict = Depends(obter_usuario_atual)):
     ref = db.collection("agendamentos").document(agendamento_id)
     ref.update({"status": "Cancelado", "atualizado_em": datetime.now(timezone.utc)})
     return {"mensagem": "Cancelado!"}

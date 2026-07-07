@@ -1,15 +1,16 @@
 from app.db.database import db
 from datetime import datetime
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from google.cloud.firestore import FieldFilter
 
+from app.utils.auth import requer_admin
 from app.models.servicos import ServicoCreate, ServicoUpdate
 
 router = APIRouter(prefix="/servicos", tags=["Serviços"])
 
 
 @router.post("/")
-async def criar_servico(dados: ServicoCreate):
+async def criar_servico(dados: ServicoCreate, admin_user: dict = Depends(requer_admin)):
     try:
         existente = db.collection("servicos").where(filter=FieldFilter("nome", "==", dados.nome)).get()
 
@@ -88,7 +89,7 @@ async def buscar_servico(servico_id: str):
 
 
 @router.patch("/{servico_id}")
-async def atualizar_servico(servico_id: str, dados: ServicoUpdate):
+async def atualizar_servico(servico_id: str, dados: ServicoUpdate, admin_user: dict = Depends(requer_admin)):
     try:
         ref = db.collection("servicos").document(servico_id)
         doc = ref.get()
@@ -115,7 +116,7 @@ async def atualizar_servico(servico_id: str, dados: ServicoUpdate):
 
 
 @router.delete("/{servico_id}")
-async def deletar_servico(servico_id: str):
+async def deletar_servico(servico_id: str, admin_user: dict = Depends(requer_admin)):
     try:
         ref = db.collection("servicos").document(servico_id)
         doc = ref.get()

@@ -1,19 +1,24 @@
 <div class="auth-container">
   <h2>Acesso JamesBarber</h2>
 
-  <input type="email" [(ngModel)]="usuario.email" placeholder="E-mail">
+  <input type="email" [(ngModel)]="usuario.email" placeholder="E-mail" />
+  <input type="password" [(ngModel)]="usuario.senha" placeholder="Senha" />
 
-  <input type="password" [(ngModel)]="usuario.senha" placeholder="Senha">
-
-  @if (senhaIncorreta()) {
-    <p class="erro-senha">Senha incorreta.</p>
-    <button type="button" class="link-recuperar" (click)="irParaRecuperarSenha()">
-      Esqueceu a senha?
-    </button>
+  @if (erro()) {
+  <p class="erro-senha">{{ erro() }}</p>
+  @if (erro().includes('senha') || erro().includes('incorretos')) {
+  <button type="button" class="link-recuperar" (click)="irParaRecuperarSenha()">
+    Esqueceu a senha?
+  </button>
+  }
   }
 
   <div class="actions">
-    <button (click)="fazerLogin()">Entrar</button>
-    <button (click)="irParaCadastro()" class="btn-secondary">Criar Conta</button>
+    <button (click)="fazerLogin()" [disabled]="carregando()">
+      {{ carregando() ? 'Entrando...' : 'Entrar' }}
+    </button>
+    <button (click)="irParaCadastro()" class="btn-secondary" [disabled]="carregando()">
+      Criar Conta
+    </button>
   </div>
 </div>

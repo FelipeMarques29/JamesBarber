@@ -2,6 +2,7 @@ import { Component, inject, OnInit, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { ApiService } from '@core/api-service';
+import { AuthService } from '@core/auth-service';
 
 @Component({
   selector: 'app-navbar',
@@ -12,6 +13,7 @@ import { ApiService } from '@core/api-service';
 export class Navbar implements OnInit {
   private router = inject(Router);
   private apiService = inject(ApiService);
+  private authService = inject(AuthService);
 
   nomeUsuario = '';
   statusUsuario = '';
@@ -38,7 +40,6 @@ export class Navbar implements OnInit {
   fecharMenu(): void { this.menuAberto = false; }
 
   logout(): void {
-    localStorage.removeItem('usuario');
-    this.router.navigate(['/login']);
+    this.authService.logout();
   }
 }
