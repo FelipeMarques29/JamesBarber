@@ -1,9 +1,9 @@
-from app.db.database import db
 from datetime import datetime, timedelta, timezone
 from fastapi import APIRouter, HTTPException
 from google.cloud.firestore import FieldFilter
 from google.cloud import firestore
 
+from app.db.database import db
 from app.models.agendamentos import AgendamentoCreate, AgendamentoUpdate
 
 router = APIRouter(prefix="/agendamentos", tags=["Agendamentos"])
@@ -98,29 +98,45 @@ async def listar_agendamentos(
     cliente_id: str | None = None,
     status: str | None = None,
     limite: int = 50,
-    dias: int = 30,
+    data_inicio: str | None = None,  # Frontend envia a data de corte se precisar
+    data_fim: str | None = None,     # Frontend envia o teto (útil para "agendamentos do dia")
     atualizado_apos: str | None = None,
 ):
     try:
         query = db.collection("agendamentos")
 
+        # 1. Filtros de Data
         if atualizado_apos:
+            # Rota de Cache: Traz apenas o que mudou recentemente
             corte = datetime.fromisoformat(atualizado_apos)
             query = query.where(filter=FieldFilter("atualizado_em", ">=", corte))
         else:
-            corte = datetime.now(tz=timezone.utc) - timedelta(days=dias)
-            query = query.where(filter=FieldFilter("data_hora", ">=", corte))
+            # Rota Normal: Usa as datas passadas pelo Angular (se existirem)
+            if data_inicio:
+                inicio = datetime.fromisoformat(data_inicio)
+                query = query.where(filter=FieldFilter("data_hora", ">=", inicio))
+            if data_fim:
+                fim = datetime.fromisoformat(data_fim)
+                query = query.where(filter=FieldFilter("data_hora", "<=", fim))
 
-        if barbeiro_id: query = query.where(filter=FieldFilter("barbeiro_id", "==", barbeiro_id))
-        if cliente_id: query = query.where(filter=FieldFilter("cliente_id", "==", cliente_id))
-        if status: query = query.where(filter=FieldFilter("status", "==", status))
+        # 2. Filtros de Entidade
+        if barbeiro_id: 
+            query = query.where(filter=FieldFilter("barbeiro_id", "==", barbeiro_id))
+        if cliente_id: 
+            query = query.where(filter=FieldFilter("cliente_id", "==", cliente_id))
+        if status: 
+            query = query.where(filter=FieldFilter("status", "==", status))
 
+        # 3. Ordenação e Limite direto no banco de dados (Economiza $)
+        campo_ordenacao = "atualizado_em" if atualizado_apos else "data_hora"
+        
+        query = query.order_by(campo_ordenacao, direction=firestore.Query.DESCENDING)
+        query = query.limit(limite)
+
+        # Executa a leitura apenas dos documentos necessários
         agendamentos = [{**doc.to_dict(), "id": doc.id} for doc in query.stream()]
 
-        # Ordenação em memória para evitar índices compostos excessivos
-        agendamentos.sort(key=lambda x: x.get("criado_em") or datetime.min, reverse=True)
-
-        return agendamentos[:limite]
+        return agendamentos
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
