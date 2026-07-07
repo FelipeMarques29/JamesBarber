@@ -1,7 +1,7 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+// import { RouterLink } from '@angular/router';
 import { ApiService } from '@core/api-service';
 import { ClienteLista } from '@shared/models/cliente-model';
 
@@ -9,7 +9,7 @@ import { Navbar } from '@shared/components/navbar/navbar';
 
 @Component({
   selector: 'app-dashboard',
-  imports: [CommonModule, Navbar, RouterLink, FormsModule],
+  imports: [CommonModule, Navbar, FormsModule],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css',
 })

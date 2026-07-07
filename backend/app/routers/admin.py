@@ -5,11 +5,12 @@ import zipfile
 import requests
 
 from datetime import datetime, date
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from fastapi.responses import StreamingResponse
 from typing import Any
 from pydantic import BaseModel, HttpUrl
 
+from app.utils.auth import requer_admin
 from app.db.database import db
 
 
@@ -48,7 +49,7 @@ def _exportar_colecao(nome: str) -> list[dict]:
 
 
 @router.get("/exportar")
-async def exportar_dados():
+async def exportar_dados(admin_user: dict = Depends(requer_admin)):
     try:
         buffer = io.BytesIO()
         with zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED) as zf:
@@ -74,7 +75,7 @@ async def exportar_dados():
 
 
 @router.post("/importar")
-async def importar_dados(dados: ImportarRequest):
+async def importar_dados(dados: ImportarRequest, admin_user: dict = Depends(requer_admin)):
     try:
         resp = requests.get(str(dados.url), timeout=15)
     except requests.RequestException as e:
@@ -120,7 +121,7 @@ async def importar_dados(dados: ImportarRequest):
 
 
 @router.get("/importados")
-async def listar_importados():
+async def listar_importados(admin_user: dict = Depends(requer_admin)):
     try:
         docs = db.collection(COLECAO_IMPORTADOS).stream()
         saida: list[dict] = []
@@ -134,7 +135,7 @@ async def listar_importados():
 
 
 @router.delete("/importados")
-async def limpar_importados():
+async def limpar_importados(admin_user: dict = Depends(requer_admin)):
     try:
         docs = list(db.collection(COLECAO_IMPORTADOS).stream())
         batch = db.batch()

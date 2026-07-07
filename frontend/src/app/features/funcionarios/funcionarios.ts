@@ -1,15 +1,15 @@
 import { Component, inject, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ApiService } from '@core/api-service';
-import { RouterLink } from '@angular/router';
-import { ClienteLista } from '@shared/models/cliente-model';
+// import { RouterLink } from '@angular/router';
+// import { ClienteLista } from '@shared/models/cliente-model';
 
 import { Navbar } from '@shared/components/navbar/navbar';
 import { BarbeiroCard, MOCK_EXTRA, ESPECIALIDADES } from '@shared/models/funcionarios-model';
 
 @Component({
   selector: 'app-funcionarios',
-  imports: [CommonModule, Navbar, RouterLink],
+  imports: [CommonModule, Navbar,],
   templateUrl: './funcionarios.html',
   styleUrl: './funcionarios.css',
 })

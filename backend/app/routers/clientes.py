@@ -1,19 +1,18 @@
-from app.db.database import db
 from datetime import datetime
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from google.cloud.firestore import FieldFilter
 from typing import Literal
 
+from app.db.database import db
 from app.models.clientes import ClienteCreate
-from app.utils.hash import Hash
+from app.utils.auth import obter_usuario_atual, requer_admin
 
 router = APIRouter(prefix="/clientes", tags=["Clientes"])
 
 @router.post("/")
 async def criar_cliente(dados: ClienteCreate):
     try:
-        senha_cripto = Hash.gerar_hash(dados.senha)
-        existente = db.collection("clientes").where(filter=FieldFilter("cliente_email", "==", dados.email)).get()
+        existente = db.collection("clientes").where(filter=FieldFilter("email", "==", dados.email)).get()
         
         if existente:
             raise HTTPException(status_code=400, detail="Este e-mail já está cadastrado.")
@@ -21,21 +20,20 @@ async def criar_cliente(dados: ClienteCreate):
         cadastro_cliente = db.collection("clientes").add({
             "nome": dados.nome,
             "email": dados.email,
-            "senha": senha_cripto,
             "telefone": dados.telefone,
             "status": "cliente",
             "funcao": None,
             "criado_em": datetime.now()
         })
-        doc_ref = cadastro_cliente[1] 
+
+        doc_ref = cadastro_cliente[1]
         novo_id = doc_ref.id
 
-        # 3. Retorna um dicionário puro
         return {
-            "id": str(novo_id), 
-            "status": "Cliente Cadastrado com sucesso!"
+            "id": str(novo_id),
+            "status": "Cliente cadastrado com sucesso!"
         }
-    
+
     except Exception as e:
         if isinstance(e, HTTPException): raise e
         raise HTTPException(status_code=500, detail=str(e))
@@ -45,6 +43,7 @@ async def listar_clientes(
     email: str | None = None,
     status: str | None = None,
     funcao: str | None = None,
+    current_user: dict = Depends(obter_usuario_atual),
 ):
     try:
         query = db.collection("clientes")
@@ -74,7 +73,9 @@ async def listar_clientes(
 async def promover_cliente(
     cliente_id: str,
     status: Literal["cliente", "funcionario", "admin"],
-    funcao: Literal["barbeiro", "limpeza", "balcao"] | None = None ):
+    funcao: Literal["barbeiro", "limpeza", "balcao"] | None = None,
+    admin_user: dict = Depends(requer_admin)
+):
     
     try:
         ref = db.collection("clientes").document(cliente_id)

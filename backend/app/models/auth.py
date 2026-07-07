@@ -2,9 +2,8 @@
 from pydantic import BaseModel, EmailStr
 
 
-class Login(BaseModel):
+class LoginRequest(BaseModel):
     email: EmailStr
-    senha: str
 
 
 class RecuperarSenha(BaseModel):
