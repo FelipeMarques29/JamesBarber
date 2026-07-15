@@ -8,7 +8,7 @@ import { ClienteLista } from '@shared/models/cliente-model';
 @Injectable({ providedIn: 'root' })
 export class AgendamentoService {
   private api = inject(ApiService);
-  private readonly CACHE_TTL_MS = 60_000; // 1 min, ajuste como quiser
+  private readonly CACHE_TTL_MS = 300_000; // 5 minutos
 
   agendamentos   = signal<Agendamento[]>([]);
   barbeiros      = signal<ClienteLista[]>([]);

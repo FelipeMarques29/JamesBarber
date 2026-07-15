@@ -48,6 +48,7 @@ export class AuthService {
   }
 
   async getToken(): Promise<string | null> {
+    await auth.authStateReady();
     return auth.currentUser ? auth.currentUser.getIdToken() : null;
   }
 }

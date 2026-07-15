@@ -14,3 +14,9 @@ class ClienteResponse(BaseModel):
     telefone: str
     status: str
     funcao: str | None
+
+class JornadaUpdate(BaseModel):
+    jornada_inicio: str | None = None
+    jornada_fim: str | None = None
+    almoco_inicio: str | None = None
+    almoco_fim: str | None = None

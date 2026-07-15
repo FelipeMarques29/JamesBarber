@@ -12,6 +12,7 @@ from pydantic import BaseModel, HttpUrl
 
 from app.utils.auth import requer_admin
 from app.db.database import db
+from app.models.bloqueios import BloqueioCreate
 
 
 router = APIRouter(prefix="/admin", tags=["Admin"])
@@ -144,5 +145,35 @@ async def limpar_importados(admin_user: dict = Depends(requer_admin)):
         if docs:
             batch.commit()
         return {"status": "ok", "deletados": len(docs)}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/bloqueios")
+async def listar_bloqueios(admin_user: dict = Depends(requer_admin)):
+    try:
+        docs = db.collection("bloqueios_agenda").stream()
+        saida: list[dict] = []
+        for doc in docs:
+            d = doc.to_dict() or {}
+            d["id"] = doc.id
+            saida.append(d)
+        return saida
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/bloqueios")
+async def criar_bloqueio(dados: BloqueioCreate, admin_user: dict = Depends(requer_admin)):
+    try:
+        novo_bloqueio = dados.model_dump()
+        ref = db.collection("bloqueios_agenda").add(novo_bloqueio)
+        return {"id": ref[1].id, "status": "Bloqueio criado com sucesso!"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.delete("/bloqueios/{bloqueio_id}")
+async def deletar_bloqueio(bloqueio_id: str, admin_user: dict = Depends(requer_admin)):
+    try:
+        db.collection("bloqueios_agenda").document(bloqueio_id).delete()
+        return {"status": "Bloqueio removido!"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

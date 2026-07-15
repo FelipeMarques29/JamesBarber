@@ -56,16 +56,22 @@ export class ApiService {
     return this.http.post<ClienteResponse>(`${this.API_URL}/clientes/`, dados);
   }
 
-  listarClientes(email?: string): Observable<ClienteLista[]> {
-    const params: Record<string, string> = {};
+  listarClientes(email?: string, limit?: number, startAfter?: string): Observable<ClienteLista[]> {
+    const params: Record<string, any> = {};
     if (email) params['email'] = email;
+    if (limit) params['limit'] = limit;
+    if (startAfter) params['start_after'] = startAfter;
     return this.http.get<ClienteLista[]>(`${this.API_URL}/clientes/`, { params });
   }
 
-  listarTodosClientes(): Observable<ClienteLista[]> {
-    return this.http.get<ClienteLista[]>(`${this.API_URL}/clientes/`, {
-      params: { status: 'cliente' }
-    });
+  totalClientes(): Observable<{ total: number }> {
+    return this.http.get<{ total: number }>(`${this.API_URL}/clientes/total`);
+  }
+
+  listarTodosClientes(limit = 20, startAfter?: string): Observable<ClienteLista[]> {
+    const params: Record<string, any> = { status: 'cliente', limit };
+    if (startAfter) params['start_after'] = startAfter;
+    return this.http.get<ClienteLista[]>(`${this.API_URL}/clientes/`, { params });
   }
 
   //LISTA FUNCIONARIOS NO DASHBOARD
@@ -92,6 +98,11 @@ export class ApiService {
     const params: any = { status };
     if (funcao) params['funcao'] = funcao;
     return this.http.patch(`${this.API_URL}/clientes/${id}/promover`, null, { params});
+  }
+
+  //DASHBOARD - atualizar jornada
+  atualizarJornada(id: string, dados: any): Observable<any> {
+    return this.http.patch(`${this.API_URL}/clientes/${id}/jornada`, dados);
   }
   //DASHBOARD - transformar cliente em funcionario
 
@@ -151,4 +162,17 @@ export class ApiService {
     return this.http.get<Agendamento[]>(`${this.API_URL}/agendamentos/grade`, { params: { data } });
   }
   //cache
+
+  // BLOQUEIOS (Folga e Barbearia Fechada)
+  listarBloqueios(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.API_URL}/admin/bloqueios`);
+  }
+
+  criarBloqueio(dados: any): Observable<any> {
+    return this.http.post<any>(`${this.API_URL}/admin/bloqueios`, dados);
+  }
+
+  removerBloqueio(id: string): Observable<any> {
+    return this.http.delete<any>(`${this.API_URL}/admin/bloqueios/${id}`);
+  }
 }
