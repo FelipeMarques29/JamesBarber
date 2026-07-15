@@ -5,6 +5,7 @@ from google.cloud.firestore import FieldFilter
 
 from app.utils.auth import requer_admin
 from app.models.servicos import ServicoCreate, ServicoUpdate
+from app.utils.cache import cache_servicos
 
 router = APIRouter(prefix="/servicos", tags=["Serviços"])
 
@@ -28,6 +29,8 @@ async def criar_servico(dados: ServicoCreate, admin_user: dict = Depends(requer_
 
         novo_id = ref[1].id
 
+        cache_servicos.clear()
+
         return {
             "id": str(novo_id),
             "status": "Serviço criado com sucesso!"
@@ -41,6 +44,11 @@ async def criar_servico(dados: ServicoCreate, admin_user: dict = Depends(requer_
 @router.get("/")
 async def listar_servicos(apenas_ativos: bool = True):
     try:
+        cache_key = f"servicos_ativos_{apenas_ativos}"
+        cached = cache_servicos.get(cache_key)
+        if cached:
+            return cached
+
         if apenas_ativos:
             query = db.collection("servicos").where(filter=FieldFilter("ativo", "==", True)).stream()
         else:
@@ -57,6 +65,8 @@ async def listar_servicos(apenas_ativos: bool = True):
                 "preco": dados.get("preco"),
                 "ativo": dados.get("ativo")
             })
+
+        cache_servicos.set(cache_key, servicos)
 
         return servicos
 
@@ -108,6 +118,8 @@ async def atualizar_servico(servico_id: str, dados: ServicoUpdate, admin_user: d
         campos["atualizado_em"] = datetime.now()
         ref.update(campos)
 
+        cache_servicos.clear()
+
         return {"mensagem": "Serviço atualizado com sucesso!"}
 
     except Exception as e:
@@ -125,6 +137,8 @@ async def deletar_servico(servico_id: str, admin_user: dict = Depends(requer_adm
             raise HTTPException(status_code=404, detail="Serviço não encontrado.")
 
         ref.delete()
+
+        cache_servicos.clear()
 
         return {"mensagem": "Serviço deletado com sucesso!"}
 

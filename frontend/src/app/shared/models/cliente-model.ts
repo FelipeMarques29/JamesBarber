@@ -15,6 +15,10 @@ export interface ClienteResponse {
   telefone: string;
   status: string;
   funcao: string | null;
+  jornada_inicio?: string;
+  jornada_fim?: string;
+  almoco_inicio?: string;
+  almoco_fim?: string;
 }
 
 export interface ClienteLista {
@@ -23,4 +27,8 @@ export interface ClienteLista {
   email: string;
   status: string;
   funcao: string | null;
+  jornada_inicio?: string;
+  jornada_fim?: string;
+  almoco_inicio?: string;
+  almoco_fim?: string;
 }

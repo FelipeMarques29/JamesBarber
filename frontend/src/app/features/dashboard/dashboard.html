@@ -72,40 +72,54 @@
   }
 
   <!-- Tabela Clientes -->
-  @if (viewUsuarios === 'clientes' && !carregandoTodosClientes && todosClientes.length > 0) {
-    <table class="admin-table">
-      <thead>
-        <tr>
-          <th>Nome</th>
-          <th>Email</th>
-          <th>Ações</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (c of todosClientes; track c.id) {
+  @if (viewUsuarios === 'clientes') {
+    @if (!carregandoTodosClientes && todosClientes.length === 0) {
+      <p class="vazio">Nenhum cliente cadastrado.</p>
+    } @else {
+      <p style="text-align: right; margin-bottom: 10px; font-size: 0.9rem; color: var(--text-muted);">
+        Total de clientes no banco: {{ totalClientes }}
+      </p>
+      <table class="admin-table">
+        <thead>
           <tr>
-            <td>{{ c.nome }}</td>
-            <td>{{ c.email }}</td>
-            <td class="td-acoes">
-              <select class="select-funcao" #funcaoSelectTabela>
-                <option value="">Função</option>
-                @for (f of funcoes; track f) {
-                  <option [value]="f">{{ f }}</option>
-                }
-              </select>
-              <button class="btn-acao btn-funcionario"
-                (click)="promover(c, 'funcionario', funcaoSelectTabela.value)">
-                → Func
-              </button>
-              <button class="btn-acao btn-admin"
-                (click)="promover(c, 'admin')">
-                → Admin
-              </button>
-            </td>
+            <th>Nome</th>
+            <th>Email</th>
+            <th>Ações</th>
           </tr>
-        }
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          @for (c of todosClientes; track c.id) {
+            <tr>
+              <td>{{ c.nome }}</td>
+              <td>{{ c.email }}</td>
+              <td class="td-acoes">
+                <select class="select-funcao" #funcaoSelectTabela>
+                  <option value="">Função</option>
+                  @for (f of funcoes; track f) {
+                    <option [value]="f">{{ f }}</option>
+                  }
+                </select>
+                <button class="btn-acao btn-funcionario"
+                  (click)="promover(c, 'funcionario', funcaoSelectTabela.value)">
+                  → Func
+                </button>
+                <button class="btn-acao btn-admin"
+                  (click)="promover(c, 'admin')">
+                  → Admin
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+      @if (haMaisClientes) {
+        <div style="text-align: center; margin-top: 15px;">
+          <button class="btn-primary" (click)="carregarMaisClientes()" [disabled]="carregandoTodosClientes">
+            {{ carregandoTodosClientes ? 'Carregando...' : 'Carregar mais clientes' }}
+          </button>
+        </div>
+      }
+    }
   }
 
   <!-- Tabela Funcionários -->
@@ -126,6 +140,10 @@
             <td>{{ f.email }}</td>
             <td><span class="badge funcao">{{ f.funcao }}</span></td>
             <td class="td-acoes">
+              <button class="btn-acao btn-funcionario"
+                (click)="abrirModalJornada(f)">
+                ⏱️ Jornada
+              </button>
               <button class="btn-acao btn-rebaixar"
                 (click)="promover(f, 'cliente')">
                 → Cliente
@@ -143,5 +161,38 @@
 </div>
 
   </div>
+
+  @if (modalJornadaAberto) {
+  <div class="modal-backdrop">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Jornada - {{ funcionarioSelecionado?.nome }}</h2>
+        <button class="btn-close" (click)="fecharModalJornada()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div style="margin-bottom: 1rem;">
+          <label style="display: block; margin-bottom: 0.5rem; color: var(--text-muted);">Início da Jornada</label>
+          <input type="time" class="busca-input" style="width: 100%; border: 1px solid var(--dark3); border-radius: 4px; padding: 0.5rem;" [(ngModel)]="jornadaEdit.jornada_inicio">
+        </div>
+        <div style="margin-bottom: 1rem;">
+          <label style="display: block; margin-bottom: 0.5rem; color: var(--text-muted);">Fim da Jornada</label>
+          <input type="time" class="busca-input" style="width: 100%; border: 1px solid var(--dark3); border-radius: 4px; padding: 0.5rem;" [(ngModel)]="jornadaEdit.jornada_fim">
+        </div>
+        <div style="margin-bottom: 1rem;">
+          <label style="display: block; margin-bottom: 0.5rem; color: var(--text-muted);">Início do Almoço</label>
+          <input type="time" class="busca-input" style="width: 100%; border: 1px solid var(--dark3); border-radius: 4px; padding: 0.5rem;" [(ngModel)]="jornadaEdit.almoco_inicio">
+        </div>
+        <div style="margin-bottom: 1rem;">
+          <label style="display: block; margin-bottom: 0.5rem; color: var(--text-muted);">Fim do Almoço</label>
+          <input type="time" class="busca-input" style="width: 100%; border: 1px solid var(--dark3); border-radius: 4px; padding: 0.5rem;" [(ngModel)]="jornadaEdit.almoco_fim">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-acao btn-rebaixar" (click)="fecharModalJornada()">Cancelar</button>
+        <button class="btn-primary" (click)="salvarJornada()">Salvar</button>
+      </div>
+    </div>
+  </div>
+  }
 
 </section>

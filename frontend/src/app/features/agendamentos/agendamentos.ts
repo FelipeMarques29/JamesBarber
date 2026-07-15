@@ -34,8 +34,11 @@ export class Agendamentos implements OnInit {
 
   readonly statusList = ['Agendado', 'Em andamento', 'Concluído', 'Cancelado'];
 
-  // todos os horários de trabalho (08:00 → 17:30, mesmos slots do backend)
-  readonly todosHorarios = this.gerarHorarios();
+  // todos os horários de trabalho, gerado dinamicamente com base no barbeiro selecionado no modal
+  todosHorarios = signal<string[]>([]);
+
+  // grade de horários para a visualização admin (fixo de 08:00 às 22:00, ou o máximo necessário)
+  readonly gradeHorarios = this.gerarHorarios('08:00', '22:00');
 
   ngOnInit(): void {
     this.recarregar();
@@ -56,6 +59,13 @@ export class Agendamentos implements OnInit {
   onBarbeiroOuDataMudou(): void {
     if (!this.form.barbeiro_id || !this.dataSelecionada) return;
     this.form.data_hora = '';
+    
+    // Gerar horários com base na jornada do barbeiro
+    const barbeiro = this.agendamentoService.barbeiros().find(b => b.id === this.form.barbeiro_id);
+    const hInicioStr = barbeiro?.jornada_inicio || '08:00';
+    const hFimStr = barbeiro?.jornada_fim || '18:00';
+    this.todosHorarios.set(this.gerarHorarios(hInicioStr, hFimStr));
+
     this.agendamentoService.buscarHorarios(this.form.barbeiro_id, this.dataSelecionada);
   }
 
@@ -77,11 +87,24 @@ export class Agendamentos implements OnInit {
     return !this.agendamentoService.horariosLivres().includes(hora);
   }
 
-  private gerarHorarios(): string[] {
+  private gerarHorarios(inicioStr = '08:00', fimStr = '18:00'): string[] {
     const slots: string[] = [];
-    for (let h = 8; h < 18; h++) {
-      const hh = String(h).padStart(2, '0');
-      slots.push(`${hh}:00`, `${hh}:30`);
+    const [iniH, iniM] = inicioStr.split(':').map(Number);
+    const [fimH, fimM] = fimStr.split(':').map(Number);
+    
+    let currentH = iniH;
+    let currentM = iniM;
+    
+    while (currentH < fimH || (currentH === fimH && currentM < fimM)) {
+      const hh = String(currentH).padStart(2, '0');
+      const mm = String(currentM).padStart(2, '0');
+      slots.push(`${hh}:${mm}`);
+      
+      currentM += 30;
+      if (currentM >= 60) {
+        currentH += 1;
+        currentM -= 60;
+      }
     }
     return slots;
   }
@@ -91,6 +114,7 @@ export class Agendamentos implements OnInit {
     this.form.cliente_id = this.usuario()?.id ?? '';
     this.dataSelecionada = '';
     this.agendamentoService.horariosLivres.set([]);
+    this.todosHorarios.set([]);
     this.modalAberto.set(true);
   }
 

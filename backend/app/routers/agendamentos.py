@@ -4,8 +4,9 @@ from google.cloud.firestore import FieldFilter
 from google.cloud import firestore
 
 from app.db.database import db
-from app.utils.auth import obter_usuario_atual
 from app.models.agendamentos import AgendamentoCreate, AgendamentoUpdate
+from app.utils.auth import obter_usuario_atual
+from app.utils.cache import cache_barbeiros
 
 router = APIRouter(prefix="/agendamentos", tags=["Agendamentos"])
 
@@ -105,6 +106,11 @@ async def listar_agendamentos(
     user: dict = Depends(obter_usuario_atual),
 ):
     try:
+        # BLOQUEIO DE SEGURANÇA:
+        # Se for cliente comum, força o filtro para o próprio ID, impedindo de ver agenda alheia.
+        if user.get("status") == "cliente":
+            cliente_id = user["id"]
+
         query = db.collection("agendamentos")
 
         # 1. Filtros de Data
@@ -171,8 +177,58 @@ async def cancelar_agendamento(agendamento_id: str, user: dict = Depends(obter_u
 async def horarios_livres(barbeiro_id: str, data: str):
     try:
         dia = datetime.strptime(data, "%Y-%m-%d").date()
-        inicio_dia = datetime(dia.year, dia.month, dia.day, 8, 0, tzinfo=BRT)
-        fim_dia = datetime(dia.year, dia.month, dia.day, 18, 0, tzinfo=BRT)
+        
+        # Buscar dados do barbeiro para saber a jornada de trabalho
+        cached_list = cache_barbeiros.get("lista_barbeiros")
+        barbeiro = None
+        if cached_list:
+            barbeiro = next((b for b in cached_list if b["id"] == barbeiro_id), None)
+            
+        if not barbeiro:
+            barbeiro_doc = db.collection("clientes").document(barbeiro_id).get()
+            if not barbeiro_doc.exists:
+                raise HTTPException(status_code=404, detail="Barbeiro não encontrado.")
+            barbeiro = barbeiro_doc.to_dict()
+        
+        h_ini_str = barbeiro.get("jornada_inicio") or "08:00"
+        h_fim_str = barbeiro.get("jornada_fim") or "18:00"
+        
+        h_ini_obj = datetime.strptime(h_ini_str, "%H:%M").time()
+        h_fim_obj = datetime.strptime(h_fim_str, "%H:%M").time()
+        
+        inicio_dia = datetime.combine(dia, h_ini_obj, tzinfo=BRT)
+        fim_dia = datetime.combine(dia, h_fim_obj, tzinfo=BRT)
+
+        # Checar bloqueios de agenda
+        bloqueios = (
+            db.collection("bloqueios_agenda")
+            .where(filter=FieldFilter("data", "==", data))
+            .stream()
+        )
+        ocupados: list[tuple[datetime, datetime]] = []
+        
+        # Bloqueio de almoço
+        almoco_ini_str = barbeiro.get("almoco_inicio")
+        almoco_fim_str = barbeiro.get("almoco_fim")
+        if almoco_ini_str and almoco_fim_str:
+            a_ini = datetime.combine(dia, datetime.strptime(almoco_ini_str, "%H:%M").time(), tzinfo=BRT)
+            a_fim = datetime.combine(dia, datetime.strptime(almoco_fim_str, "%H:%M").time(), tzinfo=BRT)
+            ocupados.append((a_ini, a_fim))
+        for doc in bloqueios:
+            b = doc.to_dict()
+            # Se for barbearia fechada (tipo=fechado) ou folga desse barbeiro
+            if b.get("tipo") == "fechado" or (b.get("tipo") == "folga" and b.get("barbeiro_id") == barbeiro_id):
+                if b.get("dia_todo", True):
+                    return {"data": data, "barbeiro_id": barbeiro_id, "horarios_livres": []}
+                else:
+                    h_inicio = b.get("hora_inicio", "08:00")
+                    h_fim = b.get("hora_fim", "18:00")
+                    h_ini_obj = datetime.strptime(h_inicio, "%H:%M").time()
+                    h_fim_obj = datetime.strptime(h_fim, "%H:%M").time()
+                    ocupados.append((
+                        datetime.combine(dia, h_ini_obj, tzinfo=BRT),
+                        datetime.combine(dia, h_fim_obj, tzinfo=BRT)
+                    ))
 
         agendamentos = (
             db.collection("agendamentos")
@@ -181,7 +237,6 @@ async def horarios_livres(barbeiro_id: str, data: str):
             .stream()
         )
 
-        ocupados: list[tuple[datetime, datetime]] = []
         for doc in agendamentos:
             ag = doc.to_dict()
             data_hora = para_brt(ag.get("data_hora"))

@@ -63,14 +63,14 @@
       <div class="grade-body">
 
         <div class="grade-horas">
-          @for (hora of todosHorarios; track hora) {
+          @for (hora of gradeHorarios; track hora) {
           <div class="grade-hora-label">{{ hora }}</div>
           }
         </div>
 
         @for (b of agendamentoService.barbeiros(); track b.id) {
         <div class="grade-col">
-          @for (hora of todosHorarios; track hora) {
+          @for (hora of gradeHorarios; track hora) {
           <div class="grade-slot-bg"></div>
           }
           @for (ag of agendamentosDoBarbeiro(b.id); track ag.id) {
@@ -165,7 +165,7 @@
     <div class="form-group">
       <label>Horário</label>
       <div class="horarios-grid">
-        @for (hora of todosHorarios; track hora) {
+        @for (hora of todosHorarios(); track hora) {
         <button type="button" class="btn-horario" [class.ocupado]="horarioOcupado(hora)"
           [class.selecionado]="horarioSelecionado(hora)" [disabled]="horarioOcupado(hora)"
           [title]="horarioOcupado(hora) ? 'Horário ocupado' : 'Disponível'" (click)="selecionarHorario(hora)">

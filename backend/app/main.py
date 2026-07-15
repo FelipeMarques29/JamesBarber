@@ -13,7 +13,13 @@ app = FastAPI(title="JamesBarber API")
 #liberacao do cors para o angular
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[
+        "http://localhost:4200", 
+        "http://127.0.0.1:4200", 
+        "http://localhost",
+        "http://192.168.15.43:4200" # Adicionado para acesso na rede local
+        # TODO: Adicione a URL de produção aqui quando for lançar (ex: "https://jamesbarber.com.br")
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

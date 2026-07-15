@@ -31,6 +31,7 @@ def verificar_token(credentials: HTTPAuthorizationCredentials = Depends(security
             headers={"WWW-Authenticate": "Bearer"},
         )
 
+
 def obter_usuario_atual(decoded_token: dict = Depends(verificar_token)) -> dict:
     email = decoded_token.get("email")
     if not email:
@@ -50,6 +51,7 @@ def obter_usuario_atual(decoded_token: dict = Depends(verificar_token)) -> dict:
     usuario["id"] = query[0].id
     return usuario
 
+
 def requer_funcionario(usuario: dict = Depends(obter_usuario_atual)) -> dict:
     status_usuario = usuario.get("status")
     if status_usuario not in ["funcionario", "admin"]:
@@ -58,6 +60,7 @@ def requer_funcionario(usuario: dict = Depends(obter_usuario_atual)) -> dict:
             detail="Acesso negado: Requer privilégios de Funcionário ou Admin."
         )
     return usuario
+
 
 def requer_admin(usuario: dict = Depends(obter_usuario_atual)) -> dict:
     if usuario.get("status") != "admin":
