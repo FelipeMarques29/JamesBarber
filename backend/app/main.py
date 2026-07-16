@@ -17,8 +17,8 @@ app.add_middleware(
         "http://localhost:4200", 
         "http://127.0.0.1:4200", 
         "http://localhost",
-        "http://192.168.15.43:4200" # Adicionado para acesso na rede local
-        # TODO: Adicione a URL de produção aqui quando for lançar (ex: "https://jamesbarber.com.br")
+        "http://192.168.15.43:4200", # Adicionado para acesso na rede local
+        "https://jamesbarber.web.app"
     ],
     allow_credentials=True,
     allow_methods=["*"],
