@@ -1,15 +1,16 @@
 <div class="auth-container">
   <h2>Recuperar senha</h2>
 
-  @if (senhaTemporaria() === null) {
+  @if (!enviado()) {
     <p class="texto">
-      Informe o e-mail cadastrado para gerar uma nova senha temporária.
+      Informe o e-mail cadastrado. Enviaremos um link para você redefinir sua senha.
     </p>
 
     <label for="email-recuperar" class="sr-only">E-mail</label>
     <input
       id="email-recuperar"
       type="email"
+      inputmode="email"
       placeholder="E-mail"
       [ngModel]="email()"
       (ngModelChange)="email.set($event)"
@@ -22,7 +23,7 @@
 
     <div class="actions">
       <button type="button" (click)="enviar()" [disabled]="enviando()">
-        {{ enviando() ? 'Enviando...' : 'Recuperar' }}
+        {{ enviando() ? 'Enviando...' : 'Enviar link' }}
       </button>
       <button
         type="button"
@@ -34,9 +35,10 @@
       </button>
     </div>
   } @else {
-    <p class="texto">Sua nova senha temporária:</p>
-    <p class="senha-temp">{{ senhaTemporaria() }}</p>
-    <p class="aviso">Entre com ela e troque assim que possível.</p>
+    <p class="texto">
+      Enviamos um link de redefinição de senha para <strong>{{ email() }}</strong>.
+    </p>
+    <p class="aviso-spam">⚠️ VERIFIQUE A CAIXA DE SPAM</p>
 
     <div class="actions">
       <button type="button" (click)="voltarParaLogin()">Ir para login</button>

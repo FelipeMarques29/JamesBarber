@@ -1,7 +1,7 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { initializeApp } from 'firebase/app';
-import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, createUserWithEmailAndPassword, sendEmailVerification } from 'firebase/auth';
+import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, createUserWithEmailAndPassword, sendEmailVerification, sendPasswordResetEmail } from 'firebase/auth';
 
 import { environment } from '../../environments/environment';
 
@@ -28,6 +28,11 @@ export class AuthService {
 
   async login(email: string, senha: string) {
     return signInWithEmailAndPassword(auth, email, senha);
+  }
+
+  // Envia o e-mail nativo do Firebase com o link de redefinição de senha.
+  async enviarEmailRedefinicaoSenha(email: string) {
+    return sendPasswordResetEmail(auth, email);
   }
 
   async cadastrar(email: string, senha: string) {
