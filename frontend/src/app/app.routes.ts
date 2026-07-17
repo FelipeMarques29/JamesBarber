@@ -3,6 +3,7 @@ import { Routes } from '@angular/router';
 import { Login } from './features/acesso/login/login';
 import { Cadastro } from './features/acesso/cadastro/cadastro';
 import { RecuperarSenha } from './features/acesso/recuperar-senha/recuperar-senha';
+import { DefinirSenha } from './features/acesso/definir-senha/definir-senha';
 import { Home } from './features/home/home';
 import { Agendamentos } from './features/agendamentos/agendamentos';
 import { Calendario } from './features/calendario/calendario';
@@ -21,6 +22,9 @@ export const routes: Routes = [
   { path: 'login', component: Login },
   { path: 'cadastro', component: Cadastro },
   { path: 'recuperar-senha', component: RecuperarSenha },
+
+  // definir nova senha após entrar com a senha temporária
+  { path: 'definir-senha', component: DefinirSenha, canActivate: [authGuard] },
 
   // exigem login (qualquer usuário)
   { path: 'home', component: Home, canActivate: [authGuard] },

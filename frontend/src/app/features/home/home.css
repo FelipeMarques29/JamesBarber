@@ -158,6 +158,14 @@
   margin: 0 auto;
 }
 
+/* ── Mensagem de status dos serviços (carregando / erro / vazio) ── */
+.servicos-status {
+  text-align: center;
+  color: var(--text-muted); /* var(--text-muted) → global */
+  font-size: 1.05rem;
+  padding: 2rem 1rem;
+}
+
 /* ── Grid de cards ── */
 .cards-grid {
   display: grid;

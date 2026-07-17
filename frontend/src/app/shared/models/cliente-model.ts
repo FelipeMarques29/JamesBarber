@@ -15,6 +15,7 @@ export interface ClienteResponse {
   telefone: string;
   status: string;
   funcao: string | null;
+  deve_trocar_senha?: boolean;
   jornada_inicio?: string;
   jornada_fim?: string;
   almoco_inicio?: string;

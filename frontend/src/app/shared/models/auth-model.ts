@@ -16,12 +16,21 @@ export interface LoginResponse {
 
 export interface RecuperarSenhaRequest {
   email: string;
+  device_id: string;
 }
 
 export interface RecuperarSenhaResponse {
   status: string;
   senha_temporaria: string;
   mensagem: string;
+}
+
+export interface RedefinirSenhaRequest {
+  nova_senha: string;
+}
+
+export interface RedefinirSenhaResponse {
+  status: string;
 }
 
 

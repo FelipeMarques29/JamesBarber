@@ -30,8 +30,29 @@ export class Cadastro {
   erro       = signal('');
   carregando = signal(false);
 
+  onTelefoneInput(event: Event) {
+    const input = event.target as HTMLInputElement;
+    // Mantém apenas dígitos (remove letras, espaços, símbolos, inclusive ao colar).
+    const numeros = input.value.replace(/\D/g, '').slice(0, 11);
+    input.value = numeros;
+    this.novoCliente.telefone = numeros;
+  }
+
+  private emailValido(email: string): boolean {
+    // Precisa ter @ com texto antes e depois, e um domínio com ponto.
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  }
+
   async cadastrar() {
     this.erro.set('');
+
+    const email = this.novoCliente.email.trim();
+    if (!this.emailValido(email)) {
+      this.erro.set('E-mail inválido. Verifique se contém @ e um domínio (ex: nome@dominio.com).');
+      return;
+    }
+    this.novoCliente.email = email;
+
     this.carregando.set(true);
 
     try {

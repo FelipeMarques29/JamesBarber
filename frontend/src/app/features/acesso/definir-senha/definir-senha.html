@@ -1,0 +1,41 @@
+<div class="auth-container">
+  <h2>Definir nova senha</h2>
+
+  <p class="texto">
+    Você entrou com uma senha temporária. Defina uma nova senha para continuar.
+  </p>
+
+  <label for="nova-senha" class="sr-only">Nova senha</label>
+  <input
+    id="nova-senha"
+    type="password"
+    placeholder="Nova senha"
+    autocomplete="new-password"
+    [ngModel]="novaSenha()"
+    (ngModelChange)="novaSenha.set($event)"
+    [disabled]="enviando()"
+  >
+
+  <label for="confirmar-senha" class="sr-only">Confirmar nova senha</label>
+  <input
+    id="confirmar-senha"
+    type="password"
+    placeholder="Confirmar nova senha"
+    autocomplete="new-password"
+    [ngModel]="confirmarSenha()"
+    (ngModelChange)="confirmarSenha.set($event)"
+    [disabled]="enviando()"
+  >
+
+  @if (erro()) {
+    <p class="erro">{{ erro() }}</p>
+  }
+
+  <p class="aviso">A senha deve ter pelo menos 6 caracteres.</p>
+
+  <div class="actions">
+    <button type="button" (click)="salvar()" [disabled]="enviando()">
+      {{ enviando() ? 'Salvando...' : 'Salvar nova senha' }}
+    </button>
+  </div>
+</div>

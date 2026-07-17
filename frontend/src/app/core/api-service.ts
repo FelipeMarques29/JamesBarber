@@ -4,7 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 import { Agendamento, AgendamentoCreate, HorariosLivresResponse } from '@shared/models/agendamento-model';
-import { LoginRequest, LoginResponse, RecuperarSenhaRequest, RecuperarSenhaResponse } from '@shared/models/auth-model';
+import { LoginRequest, LoginResponse, RecuperarSenhaRequest, RecuperarSenhaResponse, RedefinirSenhaRequest, RedefinirSenhaResponse } from '@shared/models/auth-model';
 import { ClienteCreate, ClienteResponse, ClienteLista } from '@shared/models/cliente-model';
 import { Servico, ServicoCreate, ServicoUpdate } from '@shared/models/servicos-model';
 
@@ -28,6 +28,11 @@ export class ApiService {
   //RECUPERAR SENHA
   recuperarSenha(dados: RecuperarSenhaRequest): Observable<RecuperarSenhaResponse> {
     return this.http.post<RecuperarSenhaResponse>(`${this.API_URL}/auth/recuperar-senha`, dados);
+  }
+
+  //REDEFINIR SENHA (após entrar com a senha temporária)
+  redefinirSenha(dados: RedefinirSenhaRequest): Observable<RedefinirSenhaResponse> {
+    return this.http.post<RedefinirSenhaResponse>(`${this.API_URL}/auth/redefinir-senha`, dados);
   }
 
   //VERIFICA O TIPO DE USUARIO

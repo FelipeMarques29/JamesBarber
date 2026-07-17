@@ -19,106 +19,35 @@
     <div class="gold-line"></div>
   </div>
 
-  <div class="cards-grid">
-
-    <div class="card" style="--delay: 0s">
-      <div class="card-icon">
-        <img src="/icons/scissors.svg" alt="" width="40" height="40">
-      </div>
-      <h3 class="card-title">Corte Clássico</h3>
-      <p class="card-desc">Corte tradicional com acabamento impecável. Tesoura e máquina com precisão artesanal.</p>
-      <div class="card-divider"></div>
-      <div class="card-footer">
-        <div class="card-price-wrap">
-          <span class="card-price-label">A partir de</span>
-          <span class="card-price">R$ 45</span>
+  @if (carregando()) {
+    <p class="servicos-status">Carregando serviços...</p>
+  } @else if (erro()) {
+    <p class="servicos-status">Não foi possível carregar os serviços. Tente novamente mais tarde.</p>
+  } @else if (cards().length === 0) {
+    <p class="servicos-status">Nenhum serviço disponível no momento.</p>
+  } @else {
+    <div class="cards-grid">
+      @for (servico of cards(); track servico.id) {
+        <div class="card" [style.--delay]="servico.delay">
+          <div class="card-icon">
+            <img [src]="servico.icone" alt="" width="40" height="40">
+          </div>
+          <h3 class="card-title">{{ servico.nome }}</h3>
+          @if (servico.descricao) {
+            <p class="card-desc">{{ servico.descricao }}</p>
+          }
+          <div class="card-divider"></div>
+          <div class="card-footer">
+            <div class="card-price-wrap">
+              <span class="card-price-label">A partir de</span>
+              <span class="card-price">R$ {{ servico.preco }}</span>
+            </div>
+            <button type="button" class="btn-agendar" routerLink="/agendamentos">Agendar</button>
+          </div>
         </div>
-        <button type="button" class="btn-agendar" routerLink="/agendamentos">Agendar</button>
-      </div>
+      }
     </div>
-
-    <div class="card" style="--delay: 0.08s">
-      <div class="card-icon">
-        <img src="/icons/razor.svg" alt="" width="40" height="40">
-      </div>
-      <h3 class="card-title">Barba Completa</h3>
-      <p class="card-desc">Modelagem e hidratação de barba com navalha quente e produtos premium.</p>
-      <div class="card-divider"></div>
-      <div class="card-footer">
-        <div class="card-price-wrap">
-          <span class="card-price-label">A partir de</span>
-          <span class="card-price">R$ 35</span>
-        </div>
-        <button type="button" class="btn-agendar" routerLink="/agendamentos">Agendar</button>
-      </div>
-    </div>
-
-    <div class="card destaque" style="--delay: 0.16s">
-      <div class="card-badge">Popular</div>
-      <div class="card-icon">
-        <img src="/icons/star.svg" alt="" width="40" height="40">
-      </div>
-      <h3 class="card-title">Combo Premium</h3>
-      <p class="card-desc">Corte + Barba + Sobrancelha + Hidratação. A experiência completa da barbearia.</p>
-      <div class="card-divider"></div>
-      <div class="card-footer">
-        <div class="card-price-wrap">
-          <span class="card-price-label">A partir de</span>
-          <span class="card-price">R$ 95</span>
-        </div>
-        <button type="button" class="btn-agendar" routerLink="/agendamentos">Agendar</button>
-      </div>
-    </div>
-
-    <div class="card" style="--delay: 0.24s">
-      <div class="card-icon">
-        <img src="/icons/eyebrow.svg" alt="" width="40" height="40">
-      </div>
-      <h3 class="card-title">Sobrancelha</h3>
-      <p class="card-desc">Design e acabamento de sobrancelha com pinça e linha para um visual definido.</p>
-      <div class="card-divider"></div>
-      <div class="card-footer">
-        <div class="card-price-wrap">
-          <span class="card-price-label">A partir de</span>
-          <span class="card-price">R$ 20</span>
-        </div>
-        <button type="button" class="btn-agendar" routerLink="/agendamentos">Agendar</button>
-      </div>
-    </div>
-
-    <div class="card" style="--delay: 0.32s">
-      <div class="card-icon">
-        <img src="/icons/barber-pole.svg" alt="" width="40" height="40">
-      </div>
-      <h3 class="card-title">Pigmentação</h3>
-      <p class="card-desc">Cobertura de fios brancos na barba ou cabelo com resultado natural e duradouro.</p>
-      <div class="card-divider"></div>
-      <div class="card-footer">
-        <div class="card-price-wrap">
-          <span class="card-price-label">A partir de</span>
-          <span class="card-price">R$ 60</span>
-        </div>
-        <button type="button" class="btn-agendar" routerLink="/agendamentos">Agendar</button>
-      </div>
-    </div>
-
-    <div class="card" style="--delay: 0.40s">
-      <div class="card-icon">
-        <img src="/icons/bottle.svg" alt="" width="40" height="40">
-      </div>
-      <h3 class="card-title">Hidratação</h3>
-      <p class="card-desc">Tratamento capilar profundo com produtos de alta performance para cabelos saudáveis.</p>
-      <div class="card-divider"></div>
-      <div class="card-footer">
-        <div class="card-price-wrap">
-          <span class="card-price-label">A partir de</span>
-          <span class="card-price">R$ 40</span>
-        </div>
-        <button type="button" class="btn-agendar" routerLink="/agendamentos">Agendar</button>
-      </div>
-    </div>
-
-  </div>
+  }
 </section>
 
 <!-- FOOTER -->

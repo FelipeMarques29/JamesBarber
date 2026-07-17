@@ -14,12 +14,19 @@
 
   <div class="form-group">
     <label>E-mail</label>
-    <input type="email" [(ngModel)]="novoCliente.email" placeholder="seu@email.com" />
+    <input type="email" inputmode="email" [(ngModel)]="novoCliente.email" placeholder="seu@email.com" />
   </div>
 
   <div class="form-group">
     <label>Telefone</label>
-    <input type="tel" [(ngModel)]="novoCliente.telefone" placeholder="(11) 99999-9999" />
+    <input
+      type="tel"
+      inputmode="numeric"
+      maxlength="11"
+      [value]="novoCliente.telefone"
+      (input)="onTelefoneInput($event)"
+      placeholder="(11) 99999-9999"
+    />
   </div>
 
   <div class="form-group">

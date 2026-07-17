@@ -41,7 +41,12 @@ export class Login {
         next: (res: LoginResponse) => {
           localStorage.setItem('usuario', JSON.stringify(res.usuario));
           this.carregando.set(false);
-          this.router.navigate(['/home']);
+          // Entrou com senha temporária → obriga a definir uma nova senha.
+          if (res.usuario.deve_trocar_senha) {
+            this.router.navigate(['/definir-senha']);
+          } else {
+            this.router.navigate(['/home']);
+          }
         },
         error: () => {
           this.erro.set('Erro ao carregar perfil.');
