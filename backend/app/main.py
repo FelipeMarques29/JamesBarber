@@ -17,9 +17,10 @@ app.add_middleware(
         "http://localhost:4200", 
         "http://127.0.0.1:4200", 
         "http://localhost",
-        "http://192.168.15.43:4200", # Adicionado para acesso na rede local
+        "http://192.168.15.43:4200",
         "https://jamesbarber.web.app"
     ],
+    allow_origin_regex=".*",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

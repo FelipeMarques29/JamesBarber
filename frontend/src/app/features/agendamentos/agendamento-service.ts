@@ -150,6 +150,21 @@ export class AgendamentoService {
     );
   }
 
+  atualizar(id: string, dados: any) {
+    this.salvando.set(true);
+    return this.api.atualizarAgendamento(id, dados).pipe(
+      tap({
+        next: () => {
+          this.salvando.set(false);
+          this.agendamentos.update(lista =>
+            lista.map(ag => ag.id === id ? { ...ag, ...dados } : ag)
+          );
+        },
+        error: () => this.salvando.set(false),
+      })
+    );
+  }
+
   cancelar(id: string) {
     return this.api.cancelarAgendamento(id).pipe(
       tap(() => {

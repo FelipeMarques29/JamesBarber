@@ -424,6 +424,17 @@
   text-overflow: ellipsis;
 }
 
+.grade-bloco-telefone {
+  font-size: 0.58rem;
+  font-family: monospace;
+  color: var(--gold);
+  opacity: 0.8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 2px;
+}
+
 /* =============================================
    MODAL
    ============================================= */

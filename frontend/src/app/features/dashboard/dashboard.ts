@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 // import { RouterLink } from '@angular/router';
@@ -16,15 +16,18 @@ import { Navbar } from '@shared/components/navbar/navbar';
 
 export class Dashboard implements OnInit {
   private apiService = inject(ApiService);
+  private cdr = inject(ChangeDetectorRef);
 
   clientes: ClienteLista[] = [];
   todosClientes: ClienteLista[] = [];
   funcionarios: ClienteLista[] = [];
+  admins: ClienteLista[] = [];
   barbeiros: ClienteLista[] = [];
 
   carregandoClientes = false;
   carregandoTodosClientes = false;
   carregandoFuncionarios = false;
+  carregandoAdmins = false;
   carregandoBloqueios = false;
 
   bloqueios: any[] = [];
@@ -57,19 +60,38 @@ export class Dashboard implements OnInit {
   ultimoClienteCarregado: string | null = null;
   haMaisClientes: boolean = true;
 
+  notificacao = { mostrar: false, mensagem: '', tipo: 'sucesso' };
+
+  mostrarNotificacao(mensagem: string, tipo: 'sucesso' | 'erro' = 'sucesso') {
+    this.notificacao = { mostrar: true, mensagem, tipo };
+    setTimeout(() => this.notificacao.mostrar = false, 3000);
+  }
+
+  limparBusca(): void {
+    this.busca = '';
+    this.clientes = [];
+  }
+
   ngOnInit(): void {
     this.carregarFuncionarios();
+    this.carregarAdmins();
     this.carregarBarbeiros();
     this.carregarBloqueios();
     this.apiService.totalClientes().subscribe({
-      next: (res) => this.totalClientes = res.total
+      next: (res) => {
+        this.totalClientes = res.total;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.cdr.detectChanges();
+      }
     });
   }
 
   carregarBarbeiros(): void {
     this.apiService.listarBarbeiros().subscribe({
-      next: (res) => this.barbeiros = res,
-      error: () => { }
+      next: (res) => { this.barbeiros = res; this.cdr.detectChanges(); },
+      error: () => { this.cdr.detectChanges(); }
     });
   }
 
@@ -93,12 +115,12 @@ export class Dashboard implements OnInit {
     if (!this.funcionarioSelecionado) return;
     this.apiService.atualizarJornada(this.funcionarioSelecionado.id, this.jornadaEdit).subscribe({
       next: () => {
-        alert('Jornada atualizada!');
+        this.mostrarNotificacao('Jornada atualizada!');
         this.fecharModalJornada();
         this.carregarFuncionarios();
         this.carregarBarbeiros();
       },
-      error: () => alert('Erro ao atualizar jornada.')
+      error: () => this.mostrarNotificacao('Erro ao atualizar jornada.', 'erro')
     });
   }
 
@@ -108,22 +130,23 @@ export class Dashboard implements OnInit {
       next: (res) => {
         this.bloqueios = res;
         this.carregandoBloqueios = false;
+        this.cdr.detectChanges();
       },
-      error: () => this.carregandoBloqueios = false
+      error: () => { this.carregandoBloqueios = false; this.cdr.detectChanges(); }
     });
   }
 
   criarBloqueio(): void {
     if (!this.novoBloqueio.data) {
-      alert('Selecione uma data!');
+      this.mostrarNotificacao('Selecione uma data!', 'erro');
       return;
     }
     if (this.novoBloqueio.tipo === 'folga' && !this.novoBloqueio.barbeiro_id) {
-      alert('Selecione o barbeiro para a folga!');
+      this.mostrarNotificacao('Selecione o barbeiro para a folga!', 'erro');
       return;
     }
     if (!this.novoBloqueio.dia_todo && (!this.novoBloqueio.hora_inicio || !this.novoBloqueio.hora_fim)) {
-      alert('Informe o horário de início e fim!');
+      this.mostrarNotificacao('Informe o horário de início e fim!', 'erro');
       return;
     }
 
@@ -132,7 +155,7 @@ export class Dashboard implements OnInit {
 
     this.apiService.criarBloqueio(payload).subscribe({
       next: () => {
-        alert('Bloqueio criado com sucesso!');
+        this.mostrarNotificacao('Bloqueio criado com sucesso!');
         this.carregarBloqueios();
         this.novoBloqueio = {
           data: '',
@@ -143,7 +166,7 @@ export class Dashboard implements OnInit {
           hora_fim: '18:00'
         };
       },
-      error: () => alert('Erro ao criar bloqueio.')
+      error: () => this.mostrarNotificacao('Erro ao criar bloqueio.', 'erro')
     });
   }
 
@@ -151,10 +174,10 @@ export class Dashboard implements OnInit {
     if (!confirm('Tem certeza que deseja remover este bloqueio?')) return;
     this.apiService.removerBloqueio(id).subscribe({
       next: () => {
-        alert('Removido com sucesso!');
+        this.mostrarNotificacao('Removido com sucesso!');
         this.carregarBloqueios();
       },
-      error: () => alert('Erro ao remover.')
+      error: () => this.mostrarNotificacao('Erro ao remover.', 'erro')
     });
   }
 
@@ -166,8 +189,9 @@ export class Dashboard implements OnInit {
       next: (res) => {
         this.clientes = res;
         this.carregandoClientes = false;
+        this.cdr.detectChanges();
       },
-      error: () => (this.carregandoClientes = false),
+      error: () => { this.carregandoClientes = false; this.cdr.detectChanges(); },
     });
   }
 
@@ -177,8 +201,29 @@ export class Dashboard implements OnInit {
       next: (res) => {
         this.funcionarios = res.filter(c => c.status === 'funcionario');
         this.carregandoFuncionarios = false;
+        this.cdr.detectChanges();
       },
-      error: () => (this.carregandoFuncionarios = false),
+      error: (err) => {
+        this.carregandoFuncionarios = false;
+        this.mostrarNotificacao('Erro ao carregar funcionários: ' + (err.error?.detail || err.message), 'erro');
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  carregarAdmins(): void {
+    this.carregandoAdmins = true;
+    this.apiService.listarAdmins().subscribe({
+      next: (res) => {
+        this.admins = res.filter(c => c.status === 'admin');
+        this.carregandoAdmins = false;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        this.carregandoAdmins = false;
+        this.mostrarNotificacao('Erro ao carregar admins: ' + (err.error?.detail || err.message), 'erro');
+        this.cdr.detectChanges();
+      }
     });
   }
 
@@ -193,18 +238,18 @@ export class Dashboard implements OnInit {
 
   promover(cliente: ClienteLista, status: 'funcionario' | 'admin' | 'cliente', funcao?: string): void {
     if (status === 'funcionario' && !funcao) {
-      alert('Selecione a função do funcionário.');
+      this.mostrarNotificacao('Selecione a função do funcionário.', 'erro');
       return;
     }
     this.apiService.promoverCliente(cliente.id, status, funcao).subscribe({
       next: () => {
-        alert(`${cliente.nome} atualizado para ${status}!`);
+        this.mostrarNotificacao(`${cliente.nome} atualizado para ${status}!`);
         this.buscarCliente();
         this.carregarFuncionarios();
         this.todosClientes = [];
         this.mostrarTodosClientes = false;
       },
-      error: (err) => alert('Erro: ' + (err.error?.detail || 'Falha na operação')),
+      error: (err) => this.mostrarNotificacao('Erro: ' + (err.error?.detail || 'Falha na operação'), 'erro'),
     });
   }
 
@@ -223,8 +268,30 @@ export class Dashboard implements OnInit {
         next: (res) => {
           this.funcionarios = res.filter(c => c.status === 'funcionario');
           this.carregandoFuncionarios = false;
+          this.cdr.detectChanges();
         },
-        error: () => (this.carregandoFuncionarios = false),
+        error: (err) => {
+          this.carregandoFuncionarios = false;
+          this.mostrarNotificacao('Erro ao carregar func: ' + (err.error?.detail || err.message), 'erro');
+          this.cdr.detectChanges();
+        }
+      });
+    }
+
+    if (valor === 'admins') {
+      this.admins = [];
+      this.carregandoAdmins = true;
+      this.apiService.listarAdmins().subscribe({
+        next: (res) => {
+          this.admins = res.filter(c => c.status === 'admin');
+          this.carregandoAdmins = false;
+          this.cdr.detectChanges();
+        },
+        error: (err) => {
+          this.carregandoAdmins = false;
+          this.mostrarNotificacao('Erro ao carregar admins: ' + (err.error?.detail || err.message), 'erro');
+          this.cdr.detectChanges();
+        }
       });
     }
   }
@@ -242,8 +309,13 @@ export class Dashboard implements OnInit {
           this.ultimoClienteCarregado = res[res.length - 1].id;
         }
         this.carregandoTodosClientes = false;
+        this.cdr.detectChanges();
       },
-      error: () => (this.carregandoTodosClientes = false),
+      error: (err) => {
+        this.carregandoTodosClientes = false;
+        this.mostrarNotificacao('Erro ao carregar clientes: ' + (err.error?.detail || err.message), 'erro');
+        this.cdr.detectChanges();
+      }
     });
   }
 

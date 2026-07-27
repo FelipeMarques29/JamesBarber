@@ -5,16 +5,13 @@ import { FormsModule } from '@angular/forms';
 import { ApiService } from '@core/api-service';
 import { AgendamentoService } from './agendamento-service';
 import { Navbar } from '@shared/components/navbar/navbar';
-import { DadosPanel } from '@shared/components/dados-panel/dados-panel';
 import { MiniCalendario } from '@shared/components/mini-calendario/mini-calendario';
 import { Agendamento, AgendamentoCreate } from '@shared/models/agendamento-model';
-import { Servico } from '@shared/models/servicos-model';
-import { ClienteLista } from '@shared/models/cliente-model';
 
 
 @Component({
   selector: 'app-agendamentos',
-  imports: [CommonModule, FormsModule, Navbar, DadosPanel, MiniCalendario],
+  imports: [CommonModule, FormsModule, Navbar, MiniCalendario],
   templateUrl: './agendamentos.html',
   styleUrl: './agendamentos.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -24,11 +21,13 @@ export class Agendamentos implements OnInit {
   private apiService = inject(ApiService);
   protected agendamentoService = inject(AgendamentoService);
 
-  isAdmin       = computed(() => this.apiService.hasRole('admin'));
+  isAdmin = computed(() => this.apiService.hasRole('admin'));
   isFuncionario = computed(() => this.apiService.hasRole('funcionario'));
-  usuario       = computed(() => this.apiService.getUsuarioLogado());
+  usuario = computed(() => this.apiService.getUsuarioLogado());
 
-  modalAberto     = signal(false);
+  modalAberto = signal(false);
+  agendamentoSelecionado = signal<Agendamento | null>(null);
+  modoEdicaoId = signal<string | null>(null);
   dataSelecionada = '';
   form: AgendamentoCreate = this.formVazio();
 
@@ -59,7 +58,7 @@ export class Agendamentos implements OnInit {
   onBarbeiroOuDataMudou(): void {
     if (!this.form.barbeiro_id || !this.dataSelecionada) return;
     this.form.data_hora = '';
-    
+
     // Gerar horários com base na jornada do barbeiro
     const barbeiro = this.agendamentoService.barbeiros().find(b => b.id === this.form.barbeiro_id);
     const hInicioStr = barbeiro?.jornada_inicio || '08:00';
@@ -70,11 +69,11 @@ export class Agendamentos implements OnInit {
   }
 
   selecionarHorario(hora: string): void {
-    const data   = new Date(`${this.dataSelecionada}T${hora}:00`);
+    const data = new Date(`${this.dataSelecionada}T${hora}:00`);
     const offset = -data.getTimezoneOffset();
-    const sinal  = offset >= 0 ? '+' : '-';
-    const hh     = String(Math.floor(Math.abs(offset) / 60)).padStart(2, '0');
-    const mm     = String(Math.abs(offset) % 60).padStart(2, '0');
+    const sinal = offset >= 0 ? '+' : '-';
+    const hh = String(Math.floor(Math.abs(offset) / 60)).padStart(2, '0');
+    const mm = String(Math.abs(offset) % 60).padStart(2, '0');
     this.form.data_hora = `${this.dataSelecionada}T${hora}:00${sinal}${hh}:${mm}`;
   }
 
@@ -91,15 +90,15 @@ export class Agendamentos implements OnInit {
     const slots: string[] = [];
     const [iniH, iniM] = inicioStr.split(':').map(Number);
     const [fimH, fimM] = fimStr.split(':').map(Number);
-    
+
     let currentH = iniH;
     let currentM = iniM;
-    
+
     while (currentH < fimH || (currentH === fimH && currentM < fimM)) {
       const hh = String(currentH).padStart(2, '0');
       const mm = String(currentM).padStart(2, '0');
       slots.push(`${hh}:${mm}`);
-      
+
       currentM += 30;
       if (currentM >= 60) {
         currentH += 1;
@@ -110,6 +109,7 @@ export class Agendamentos implements OnInit {
   }
 
   abrirModal(): void {
+    this.modoEdicaoId.set(null);
     this.form = this.formVazio();
     this.form.cliente_id = this.usuario()?.id ?? '';
     this.dataSelecionada = '';
@@ -124,21 +124,66 @@ export class Agendamentos implements OnInit {
 
   salvar(): void {
     if (!this.form.barbeiro_id || !this.form.servico_id || !this.form.data_hora) return;
-    this.agendamentoService.criar(this.form).subscribe({
-      next: () => {
-        this.fecharModal();
-        this.recarregar(true); // força, mas busca só o delta (incremental)
-      },
-      error: (err) => alert(err?.error?.detail ?? 'Erro ao agendar.'),
-    });
+    
+    const idEdicao = this.modoEdicaoId();
+    if (idEdicao) {
+      this.agendamentoService.atualizar(idEdicao, { data_hora: this.form.data_hora }).subscribe({
+        next: () => {
+          this.fecharModal();
+          this.recarregar(true);
+        },
+        error: (err) => alert(err?.error?.detail ?? 'Erro ao reagendar.'),
+      });
+    } else {
+      this.agendamentoService.criar(this.form).subscribe({
+        next: () => {
+          this.fecharModal();
+          this.recarregar(true); // força, mas busca só o delta (incremental)
+        },
+        error: (err) => alert(err?.error?.detail ?? 'Erro ao agendar.'),
+      });
+    }
   }
 
   cancelar(id: string): void {
     if (!confirm('Deseja cancelar este agendamento?')) return;
+    this.fecharOpcoesAdmin();
     // o service já atualiza o status localmente (update otimista) -> não precisa recarregar
     this.agendamentoService.cancelar(id).subscribe({
       error: () => alert('Erro ao cancelar.'),
     });
+  }
+
+  abrirOpcoesAdmin(ag: Agendamento): void {
+    if (this.isAdmin() || this.isFuncionario()) {
+      this.agendamentoSelecionado.set(ag);
+    }
+  }
+
+  fecharOpcoesAdmin(): void {
+    this.agendamentoSelecionado.set(null);
+  }
+
+  marcarComoConcluido(ag: Agendamento): void {
+    this.agendamentoService.atualizar(ag.id, { status: 'Concluído' }).subscribe({
+      next: () => this.fecharOpcoesAdmin(),
+      error: () => alert('Erro ao concluir agendamento.'),
+    });
+  }
+
+  abrirModalReagendar(ag: Agendamento): void {
+    this.fecharOpcoesAdmin();
+    this.form = {
+      barbeiro_id: ag.barbeiro_id,
+      cliente_id: ag.cliente_id,
+      servico_id: ag.servico_id,
+      data_hora: '' // obriga a escolher nova data
+    };
+    this.modoEdicaoId.set(ag.id);
+    this.dataSelecionada = '';
+    this.agendamentoService.horariosLivres.set([]);
+    this.todosHorarios.set([]);
+    this.modalAberto.set(true);
   }
 
   nomeServico(id: string): string {
@@ -158,10 +203,10 @@ export class Agendamentos implements OnInit {
 
   corStatus(status: string): string {
     const map: Record<string, string> = {
-      'Agendado':     'status-agendado',
+      'Agendado': 'status-agendado',
       'Em andamento': 'status-andamento',
-      'Concluído':    'status-concluido',
-      'Cancelado':    'status-cancelado',
+      'Concluído': 'status-concluido',
+      'Cancelado': 'status-cancelado',
     };
     return map[status] ?? '';
   }
@@ -211,7 +256,7 @@ export class Agendamentos implements OnInit {
 
   formatarHora(iso: string): string {
     const d = new Date(iso);
-    return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+    return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
   }
 
   setFiltroStatus(valor: string): void {

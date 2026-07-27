@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
-import { Agendamento, AgendamentoCreate, HorariosLivresResponse } from '@shared/models/agendamento-model';
+import { Agendamento, AgendamentoCreate, AgendamentoUpdate, HorariosLivresResponse } from '@shared/models/agendamento-model';
 import { LoginRequest, LoginResponse, RecuperarSenhaRequest, RecuperarSenhaResponse, RedefinirSenhaRequest, RedefinirSenhaResponse } from '@shared/models/auth-model';
 import { ClienteCreate, ClienteResponse, ClienteLista } from '@shared/models/cliente-model';
 import { Servico, ServicoCreate, ServicoUpdate } from '@shared/models/servicos-model';
@@ -86,6 +86,12 @@ export class ApiService {
     });
   }
 
+  listarAdmins(): Observable<ClienteLista[]> {
+    return this.http.get<ClienteLista[]>(`${this.API_URL}/clientes/`, {
+      params: { status: 'admin' }
+    });
+  }
+
   listarBarbeiros(): Observable<ClienteLista[]> {
     return this.http.get<ClienteLista[]>(`${this.API_URL}/clientes/`, {
       params: { funcao: 'barbeiro' }
@@ -134,6 +140,10 @@ export class ApiService {
   //CRIAR AGENDAMENTO
   criarAgendamento(dados: AgendamentoCreate): Observable<any> {
     return this.http.post(`${this.API_URL}/agendamentos/`, dados);
+  }
+
+  atualizarAgendamento(id: string, dados: AgendamentoUpdate): Observable<any> {
+    return this.http.patch(`${this.API_URL}/agendamentos/${id}`, dados);
   }
 
   listarAgendamentos(filtros?: {

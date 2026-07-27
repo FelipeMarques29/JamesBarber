@@ -3,14 +3,15 @@ import hashlib
 import math
 import secrets
 import string
-from datetime import datetime, timezone
 
+from datetime import datetime, timezone
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from firebase_admin import auth as firebase_auth
+from google.cloud.firestore_v1.base_query import FieldFilter
+
 from app.db.database import db
 from app.models.auth import LoginRequest, RecuperarSenha, RedefinirSenha
-from google.cloud.firestore_v1.base_query import FieldFilter
 
 security = HTTPBearer()
 

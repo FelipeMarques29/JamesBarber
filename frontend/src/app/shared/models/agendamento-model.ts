@@ -10,6 +10,7 @@ export interface Agendamento {
   barbeiro_nome: string;
   cliente_id: string;
   cliente_nome: string;
+  cliente_telefone?: string;
   servico_id: string;
   servico_nome: string;
   data_hora: string;
@@ -24,6 +25,11 @@ export interface AgendamentoCreate {
   cliente_id: string;
   servico_id: string;
   data_hora: string;
+}
+
+export interface AgendamentoUpdate {
+  status?: StatusAgendamento;
+  data_hora?: string;
 }
 
 export interface HorariosLivresResponse {

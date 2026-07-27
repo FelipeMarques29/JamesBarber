@@ -75,10 +75,13 @@
           }
           @for (ag of agendamentosDoBarbeiro(b.id); track ag.id) {
           <div class="grade-bloco" [class]="'grade-bloco--' + corStatus(ag.status)" [style.top]="posicaoBloco(ag).top"
-            [style.height]="posicaoBloco(ag).height">
+            [style.height]="posicaoBloco(ag).height" (click)="abrirOpcoesAdmin(ag)" title="Gerenciar Agendamento">
             <span class="grade-bloco-hora">{{ formatarHora(ag.data_hora) }}</span>
             <span class="grade-bloco-servico">{{ ag.servico_nome }}</span>
             <span class="grade-bloco-cliente">{{ ag.cliente_nome }}</span>
+            @if (isAdmin() && ag.status === 'Agendado' && ag.cliente_telefone) {
+            <span class="grade-bloco-telefone">{{ ag.cliente_telefone }}</span>
+            }
           </div>
           }
         </div>
@@ -121,17 +124,12 @@
   </div>
   }
 
-  <div class="dados-section">
-    <h3 class="dados-section-title">Exportar / Importar dados</h3>
-    <app-dados-panel />
-  </div>
-
 </section>
 
 @if (modalAberto()) {
 <div class="modal-overlay" (click)="fecharModal()">
   <div class="modal" (click)="$event.stopPropagation()">
-    <h3 class="modal-title">Novo Agendamento</h3>
+    <h3 class="modal-title">{{ modoEdicaoId() ? 'Reagendar Agendamento' : 'Novo Agendamento' }}</h3>
 
     <div class="form-group">
       <label>Barbeiro</label>
@@ -182,6 +180,43 @@
       <button class="btn-salvar" (click)="salvar()" [disabled]="agendamentoService.salvando() || !form.data_hora">
         {{ agendamentoService.salvando() ? 'Agendando...' : 'Confirmar' }}
       </button>
+    </div>
+  </div>
+</div>
+}
+
+@if (agendamentoSelecionado()) {
+<div class="modal-overlay" (click)="fecharOpcoesAdmin()">
+  <div class="modal" (click)="$event.stopPropagation()">
+    <h3 class="modal-title">Gerenciar Agendamento</h3>
+    <p style="margin-bottom: 20px; color: var(--text-muted);">
+      Cliente: <strong>{{ agendamentoSelecionado()!.cliente_nome }}</strong><br>
+      Serviço: {{ agendamentoSelecionado()!.servico_nome }}<br>
+      Horário: {{ formatarDataHora(agendamentoSelecionado()!.data_hora) }}
+    </p>
+
+    <div style="display: flex; flex-direction: column; gap: 10px;">
+      @if (agendamentoSelecionado()!.status !== 'Concluído' && agendamentoSelecionado()!.status !== 'Cancelado') {
+        <button class="btn-salvar" style="width: 100%; background-color: #4ade80; color: #000;" 
+                (click)="marcarComoConcluido(agendamentoSelecionado()!)">
+          Marcar como Concluído
+        </button>
+        <button class="btn-salvar" style="width: 100%;" 
+                (click)="abrirModalReagendar(agendamentoSelecionado()!)">
+          Reagendar
+        </button>
+      }
+      
+      @if (agendamentoSelecionado()!.status !== 'Cancelado') {
+        <button class="btn-cancelar" style="width: 100%;" 
+                (click)="cancelar(agendamentoSelecionado()!.id)">
+          Cancelar Agendamento
+        </button>
+      }
+    </div>
+
+    <div class="modal-footer" style="margin-top: 20px;">
+      <button class="btn-cancelar-modal" style="width: 100%;" (click)="fecharOpcoesAdmin()">Fechar</button>
     </div>
   </div>
 </div>
