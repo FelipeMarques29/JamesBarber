@@ -1,3 +1,11 @@
+@if (notificacao.mostrar) {
+<div class="toast-notification" [class.erro]="notificacao.tipo === 'erro'">
+  <i class="ti" [class.ti-check]="notificacao.tipo === 'sucesso'"
+    [class.ti-alert-circle]="notificacao.tipo === 'erro'"></i>
+  {{ notificacao.mensagem }}
+</div>
+}
+
 <app-navbar></app-navbar>
 
 <section class="page-hero">
@@ -10,72 +18,105 @@
     <p class="section-desc">Gerencie clientes e funcionários.</p>
   </div>
 
+  <div class="metrics-grid">
+    <div class="metric-card">
+      <div class="metric-icon"><i class="ti ti-users"></i></div>
+      <div class="metric-info">
+        <h3>Total de Clientes</h3>
+        <p>{{ totalClientes }}</p>
+      </div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-icon"><i class="ti ti-user-check"></i></div>
+      <div class="metric-info">
+        <h3>Funcionários Ativos</h3>
+        <p>{{ funcionarios.length }}</p>
+      </div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-icon"><i class="ti ti-shield"></i></div>
+      <div class="metric-info">
+        <h3>Admins Ativos</h3>
+        <p>{{ admins.length }}</p>
+      </div>
+    </div>
+  </div>
+
   <!-- Busca por cliente -->
   <div class="busca-wrap">
-    <input
-      class="busca-input"
-      type="email"
-      [(ngModel)]="busca"
-      placeholder="Digite o e-mail do cliente..."
-      (keyup.enter)="buscarCliente()"
-    />
-    <button class="btn-primary" (click)="buscarCliente()">
-      <i class="ti ti-search"></i> Buscar
-    </button>
+    <i class="ti ti-search busca-icon"></i>
+    <input class="busca-input" type="email" [(ngModel)]="busca" placeholder="Digite o e-mail do cliente..."
+      (input)="buscarCliente()" />
+    @if (busca) {
+    <button class="btn-clear" (click)="limparBusca()"><i class="ti ti-x"></i></button>
+    }
   </div>
 
   @if (carregandoClientes) {
-    <p class="loading">Buscando...</p>
+  <p class="loading">Buscando...</p>
   }
   @if (!carregandoClientes && clientes.length === 0 && busca) {
-    <p class="vazio">Nenhum cliente encontrado.</p>
+  <div class="empty-state">
+    <i class="ti ti-mood-empty"></i>
+    <p>Nenhum cliente encontrado com esse e-mail.</p>
+  </div>
   }
   @for (c of clientes; track c.id) {
-    <div class="usuario-card">
-      <div class="usuario-info">
-        <div class="avatar-mini">{{ c.nome[0].toUpperCase() }}</div>
-        <div>
-          <p class="usuario-nome">{{ c.nome }}</p>
-          <p class="usuario-email">{{ c.email }}</p>
-        </div>
-      </div>
-      <div class="usuario-acoes">
-        <select class="select-funcao" #funcaoSelect>
-          <option value="">Selecionar função</option>
-          @for (f of funcoes; track f) {
-            <option [value]="f">{{ f }}</option>
-          }
-        </select>
-        <button class="btn-acao btn-funcionario"
-          (click)="promover(c, 'funcionario', funcaoSelect.value)">
-          → Funcionário
-        </button>
-        <button class="btn-acao btn-admin"
-          (click)="promover(c, 'admin')">
-          → Admin
-        </button>
+  <div class="usuario-card">
+    <div class="usuario-info">
+      <div class="avatar-mini">{{ c.nome[0].toUpperCase() }}</div>
+      <div>
+        <p class="usuario-nome">{{ c.nome }}</p>
+        <p class="usuario-email">{{ c.email }}</p>
       </div>
     </div>
+    <div class="usuario-acoes">
+      <select class="select-funcao" #funcaoSelect>
+        <option value="">Selecionar função</option>
+        @for (f of funcoes; track f) {
+        <option [value]="f">{{ f }}</option>
+        }
+      </select>
+      <button class="btn-acao btn-funcionario" (click)="promover(c, 'funcionario', funcaoSelect.value)">
+        → Funcionário
+      </button>
+      <button class="btn-acao btn-admin" (click)="promover(c, 'admin')">
+        → Admin
+      </button>
+    </div>
+  </div>
   }
 
   <!-- Selects de listagem -->
   <div class="selects-wrap">
-      <div class="select-grupo">
-  <select class="form-select" [(ngModel)]="viewUsuarios" (ngModelChange)="onSelectUsuarios($event)">
-    <option value="">Selecionar listagem</option>
-    <option value="clientes">Clientes</option>
-    <option value="funcionarios">Funcionários</option>
-  </select>
+    <div class="select-grupo">
+      <div class="tabs">
+        <button class="tab-btn" [class.active]="viewUsuarios === 'clientes'"
+          (click)="viewUsuarios = 'clientes'; onSelectUsuarios('clientes')">
+          Clientes
+        </button>
+        <button class="tab-btn" [class.active]="viewUsuarios === 'funcionarios'"
+          (click)="viewUsuarios = 'funcionarios'; onSelectUsuarios('funcionarios')">
+          Funcionários
+        </button>
+        <button class="tab-btn" [class.active]="viewUsuarios === 'admins'"
+          (click)="viewUsuarios = 'admins'; onSelectUsuarios('admins')">
+          Admins
+        </button>
+      </div>
 
-  @if (carregandoTodosClientes || carregandoFuncionarios) {
-    <p class="loading">Carregando...</p>
-  }
+      @if (carregandoTodosClientes || carregandoFuncionarios || carregandoAdmins) {
+      <p class="loading">Carregando...</p>
+      }
 
-  <!-- Tabela Clientes -->
-  @if (viewUsuarios === 'clientes') {
-    @if (!carregandoTodosClientes && todosClientes.length === 0) {
-      <p class="vazio">Nenhum cliente cadastrado.</p>
-    } @else {
+      <!-- Tabela Clientes -->
+      @if (viewUsuarios === 'clientes') {
+      @if (!carregandoTodosClientes && todosClientes.length === 0) {
+      <div class="empty-state">
+        <i class="ti ti-users-minus"></i>
+        <p>Nenhum cliente cadastrado ainda.</p>
+      </div>
+      } @else {
       <p style="text-align: right; margin-bottom: 10px; font-size: 0.9rem; color: var(--text-muted);">
         Total de clientes no banco: {{ totalClientes }}
       </p>
@@ -89,76 +130,106 @@
         </thead>
         <tbody>
           @for (c of todosClientes; track c.id) {
-            <tr>
-              <td>{{ c.nome }}</td>
-              <td>{{ c.email }}</td>
-              <td class="td-acoes">
-                <select class="select-funcao" #funcaoSelectTabela>
-                  <option value="">Função</option>
-                  @for (f of funcoes; track f) {
-                    <option [value]="f">{{ f }}</option>
-                  }
-                </select>
-                <button class="btn-acao btn-funcionario"
-                  (click)="promover(c, 'funcionario', funcaoSelectTabela.value)">
-                  → Func
-                </button>
-                <button class="btn-acao btn-admin"
-                  (click)="promover(c, 'admin')">
-                  → Admin
-                </button>
-              </td>
-            </tr>
+          <tr>
+            <td>{{ c.nome }}</td>
+            <td>{{ c.email }}</td>
+            <td class="td-acoes">
+              <select class="select-funcao" #funcaoSelectTabela>
+                <option value="">Função</option>
+                @for (f of funcoes; track f) {
+                <option [value]="f">{{ f }}</option>
+                }
+              </select>
+              <button class="btn-acao btn-funcionario" (click)="promover(c, 'funcionario', funcaoSelectTabela.value)">
+                Funcionário
+              </button>
+              <button class="btn-acao btn-admin" (click)="promover(c, 'admin')">
+                Admin
+              </button>
+            </td>
+          </tr>
           }
         </tbody>
       </table>
       @if (haMaisClientes) {
-        <div style="text-align: center; margin-top: 15px;">
-          <button class="btn-primary" (click)="carregarMaisClientes()" [disabled]="carregandoTodosClientes">
-            {{ carregandoTodosClientes ? 'Carregando...' : 'Carregar mais clientes' }}
-          </button>
-        </div>
+      <div style="text-align: center; margin-top: 15px;">
+        <button class="btn-primary" (click)="carregarMaisClientes()" [disabled]="carregandoTodosClientes">
+          {{ carregandoTodosClientes ? 'Carregando...' : 'Carregar mais clientes' }}
+        </button>
+      </div>
       }
-    }
-  }
+      }
+      }
 
-  <!-- Tabela Funcionários -->
-  @if (viewUsuarios === 'funcionarios' && !carregandoFuncionarios && funcionarios.length > 0) {
-    <table class="admin-table">
-      <thead>
-        <tr>
-          <th>Nome</th>
-          <th>Email</th>
-          <th>Função</th>
-          <th>Ações</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (f of funcionarios; track f.id) {
+      <!-- Tabela Funcionários -->
+      @if (viewUsuarios === 'funcionarios' && !carregandoFuncionarios && funcionarios.length > 0) {
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Nome</th>
+            <th>Email</th>
+            <th>Função</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (f of funcionarios; track f.id) {
           <tr>
             <td>{{ f.nome }}</td>
             <td>{{ f.email }}</td>
             <td><span class="badge funcao">{{ f.funcao }}</span></td>
             <td class="td-acoes">
-              <button class="btn-acao btn-funcionario"
-                (click)="abrirModalJornada(f)">
+              <button class="btn-acao btn-funcionario" (click)="abrirModalJornada(f)">
                 ⏱️ Jornada
               </button>
-              <button class="btn-acao btn-rebaixar"
-                (click)="promover(f, 'cliente')">
-                → Cliente
+              <button class="btn-acao btn-rebaixar" (click)="promover(f, 'cliente')">
+                Cliente
               </button>
-              <button class="btn-acao btn-admin"
-                (click)="promover(f, 'admin')">
-                → Admin
+              <button class="btn-acao btn-admin" (click)="promover(f, 'admin')">
+                Admin
               </button>
             </td>
           </tr>
-        }
-      </tbody>
-    </table>
-  }
-</div>
+          }
+        </tbody>
+      </table>
+      }
+
+      <!-- Tabela Admins -->
+      @if (viewUsuarios === 'admins' && !carregandoAdmins && admins.length > 0) {
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Nome</th>
+            <th>Email</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (a of admins; track a.id) {
+          <tr>
+            <td>{{ a.nome }}</td>
+            <td>{{ a.email }}</td>
+            <td class="td-acoes">
+              <button class="btn-acao btn-rebaixar" (click)="promover(a, 'cliente')">
+                Cliente
+              </button>
+              <select class="select-funcao" #funcaoSelectAdmin>
+                <option value="">Função Func.</option>
+                @for (f of funcoes; track f) {
+                <option [value]="f">{{ f }}</option>
+                }
+              </select>
+              <button class="btn-acao btn-funcionario" (click)="promover(a, 'funcionario', funcaoSelectAdmin.value)">
+                Funcionário
+              </button>
+            </td>
+          </tr>
+          }
+        </tbody>
+      </table>
+      }
+    </div>
 
   </div>
 
@@ -170,21 +241,23 @@
         <button class="btn-close" (click)="fecharModalJornada()">&times;</button>
       </div>
       <div class="modal-body">
-        <div style="margin-bottom: 1rem;">
-          <label style="display: block; margin-bottom: 0.5rem; color: var(--text-muted);">Início da Jornada</label>
-          <input type="time" class="busca-input" style="width: 100%; border: 1px solid var(--dark3); border-radius: 4px; padding: 0.5rem;" [(ngModel)]="jornadaEdit.jornada_inicio">
-        </div>
-        <div style="margin-bottom: 1rem;">
-          <label style="display: block; margin-bottom: 0.5rem; color: var(--text-muted);">Fim da Jornada</label>
-          <input type="time" class="busca-input" style="width: 100%; border: 1px solid var(--dark3); border-radius: 4px; padding: 0.5rem;" [(ngModel)]="jornadaEdit.jornada_fim">
-        </div>
-        <div style="margin-bottom: 1rem;">
-          <label style="display: block; margin-bottom: 0.5rem; color: var(--text-muted);">Início do Almoço</label>
-          <input type="time" class="busca-input" style="width: 100%; border: 1px solid var(--dark3); border-radius: 4px; padding: 0.5rem;" [(ngModel)]="jornadaEdit.almoco_inicio">
-        </div>
-        <div style="margin-bottom: 1rem;">
-          <label style="display: block; margin-bottom: 0.5rem; color: var(--text-muted);">Fim do Almoço</label>
-          <input type="time" class="busca-input" style="width: 100%; border: 1px solid var(--dark3); border-radius: 4px; padding: 0.5rem;" [(ngModel)]="jornadaEdit.almoco_fim">
+        <div class="modal-grid">
+          <div class="form-group">
+            <label>Início da Jornada</label>
+            <input type="time" class="busca-input modal-input" [(ngModel)]="jornadaEdit.jornada_inicio">
+          </div>
+          <div class="form-group">
+            <label>Fim da Jornada</label>
+            <input type="time" class="busca-input modal-input" [(ngModel)]="jornadaEdit.jornada_fim">
+          </div>
+          <div class="form-group">
+            <label>Início do Almoço</label>
+            <input type="time" class="busca-input modal-input" [(ngModel)]="jornadaEdit.almoco_inicio">
+          </div>
+          <div class="form-group">
+            <label>Fim do Almoço</label>
+            <input type="time" class="busca-input modal-input" [(ngModel)]="jornadaEdit.almoco_fim">
+          </div>
         </div>
       </div>
       <div class="modal-footer">

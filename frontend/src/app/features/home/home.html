@@ -6,7 +6,7 @@
   <div class="hero-content">
     <p class="hero-subtitle">Estilo & Precisão</p>
     <h1 class="hero-title">Sua aparência,<br /><em>nossa arte.</em></h1>
-    <a href="#servicos" class="btn-primary">Ver Serviços</a>
+    <a routerLink="/servicos" class="btn-primary">Ver Serviços</a>
   </div>
   <div class="hero-ornament"></div>
 </section>
@@ -20,33 +20,33 @@
   </div>
 
   @if (carregando()) {
-    <p class="servicos-status">Carregando serviços...</p>
+  <p class="servicos-status">Carregando serviços...</p>
   } @else if (erro()) {
-    <p class="servicos-status">Não foi possível carregar os serviços. Tente novamente mais tarde.</p>
+  <p class="servicos-status">Não foi possível carregar os serviços. Tente novamente mais tarde.</p>
   } @else if (cards().length === 0) {
-    <p class="servicos-status">Nenhum serviço disponível no momento.</p>
+  <p class="servicos-status">Nenhum serviço disponível no momento.</p>
   } @else {
-    <div class="cards-grid">
-      @for (servico of cards(); track servico.id) {
-        <div class="card" [style.--delay]="servico.delay">
-          <div class="card-icon">
-            <img [src]="servico.icone" alt="" width="40" height="40">
-          </div>
-          <h3 class="card-title">{{ servico.nome }}</h3>
-          @if (servico.descricao) {
-            <p class="card-desc">{{ servico.descricao }}</p>
-          }
-          <div class="card-divider"></div>
-          <div class="card-footer">
-            <div class="card-price-wrap">
-              <span class="card-price-label">A partir de</span>
-              <span class="card-price">R$ {{ servico.preco }}</span>
-            </div>
-            <button type="button" class="btn-agendar" routerLink="/agendamentos">Agendar</button>
-          </div>
-        </div>
+  <div class="cards-grid">
+    @for (servico of cards(); track servico.id) {
+    <div class="card" [style.--delay]="servico.delay">
+      <div class="card-icon">
+        <img [src]="servico.icone" alt="" width="40" height="40">
+      </div>
+      <h3 class="card-title">{{ servico.nome }}</h3>
+      @if (servico.descricao) {
+      <p class="card-desc">{{ servico.descricao }}</p>
       }
+      <div class="card-divider"></div>
+      <div class="card-footer">
+        <div class="card-price-wrap">
+          <span class="card-price-label">A partir de</span>
+          <span class="card-price">R$ {{ servico.preco }}</span>
+        </div>
+        <button type="button" class="btn-agendar" routerLink="/agendamentos">Agendar</button>
+      </div>
     </div>
+    }
+  </div>
   }
 </section>
 

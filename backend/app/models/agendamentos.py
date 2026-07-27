@@ -22,6 +22,7 @@ class AgendamentoResponse(BaseModel):
     barbeiro_nome: str
     cliente_id: str
     cliente_nome: str
+    cliente_telefone: Optional[str] = None
     servico_id: str
     data_hora: datetime
     status: StatusAgendamento

@@ -76,6 +76,7 @@ async def criar_agendamento(dados: AgendamentoCreate, user: dict = Depends(obter
             "barbeiro_nome": barbeiro.get("nome"),
             "cliente_id": dados.cliente_id,
             "cliente_nome": cliente.get("nome"),
+            "cliente_telefone": cliente.get("telefone"),
             "servico_id": dados.servico_id,
             "servico_nome": servico.get("nome"),
             "duracao_minutos": duracao,
@@ -158,9 +159,39 @@ async def buscar_agendamento(agendamento_id: str, user: dict = Depends(obter_usu
 
 @router.patch("/{agendamento_id}")
 async def atualizar_agendamento(agendamento_id: str, dados: AgendamentoUpdate, user: dict = Depends(obter_usuario_atual)):
-    # Lógica similar à de criação, mantendo a consistência dos dados desnormalizados
     ref = db.collection("agendamentos").document(agendamento_id)
+    doc = ref.get()
+    if not doc.exists:
+        raise HTTPException(status_code=404, detail="Não encontrado.")
+
+    ag_atual = doc.to_dict()
     campos = dados.model_dump(exclude_none=True)
+
+    if "data_hora" in campos:
+        inicio_novo = normalizar_data(dados.data_hora)
+        duracao = ag_atual.get("duracao_minutos", 30)
+        fim_novo = inicio_novo + timedelta(minutes=duracao)
+
+        # Validação de conflito
+        agendamentos_barbeiro = (
+            db.collection("agendamentos")
+            .where(filter=FieldFilter("barbeiro_id", "==", ag_atual.get("barbeiro_id")))
+            .where(filter=FieldFilter("status", "in", ["Agendado", "Em andamento"]))
+            .stream()
+        )
+
+        for ag_doc in agendamentos_barbeiro:
+            if ag_doc.id == agendamento_id:
+                continue
+
+            ag_db = ag_doc.to_dict()
+            inicio_existente = normalizar_data(ag_db.get("data_hora"))
+            fim_existente = inicio_existente + timedelta(minutes=ag_db.get("duracao_minutos", 30))
+            if inicio_novo < fim_existente and fim_novo > inicio_existente:
+                raise HTTPException(status_code=409, detail="Conflito de horário.")
+
+        campos["data_string"] = inicio_novo.strftime("%Y-%m-%d")
+
     campos["atualizado_em"] = datetime.now(timezone.utc)
     ref.update(campos)
     return {"mensagem": "Atualizado!"}

@@ -15,7 +15,7 @@ router = APIRouter(prefix="/clientes", tags=["Clientes"])
 @router.get("/total")
 async def total_clientes(current_user: dict = Depends(obter_usuario_atual)):
     try:
-        query = db.collection("clientes")
+        query = db.collection("clientes").where(filter=FieldFilter("status", "==", "cliente"))
         count_query = query.count()
         results = count_query.get()
         return {"total": results[0][0].value}
@@ -79,8 +79,7 @@ async def listar_clientes(
         if funcao:
             query = query.where(filter=FieldFilter("funcao", "==", funcao))
 
-        query = query.order_by("criado_em", direction=firestore.Query.DESCENDING)
-
+        # query = query.order_by("criado_em", direction=firestore.Query.DESCENDING)
         if start_after:
             last_doc = db.collection("clientes").document(start_after).get()
             if last_doc.exists:

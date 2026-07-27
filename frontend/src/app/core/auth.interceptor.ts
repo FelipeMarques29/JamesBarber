@@ -1,27 +1,31 @@
 import { HttpInterceptorFn } from '@angular/common/http';
-import { inject } from '@angular/core';
+import { inject, NgZone } from '@angular/core';
 
-import { from, switchMap } from 'rxjs';
+import { from, switchMap, Observable } from 'rxjs';
 
 import { AuthService } from './auth-service';
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const authService = inject(AuthService);
+  const zone = inject(NgZone);
 
-  // Obtém o token de forma assíncrona do Firebase Auth
-  return from(authService.getToken()).pipe(
-    switchMap(token => {
-      if (token) {
-        // Clona a requisição adicionando o cabeçalho Authorization
-        const authReq = req.clone({
-          setHeaders: {
-            Authorization: `Bearer ${token}`
-          }
-        });
-        return next(authReq);
-      }
-      // Se não houver token, envia a requisição original
-      return next(req);
-    })
-  );
+  return new Observable(observer => {
+    from(authService.getToken()).pipe(
+      switchMap(token => {
+        if (token) {
+          const authReq = req.clone({
+            setHeaders: {
+              Authorization: `Bearer ${token}`
+            }
+          });
+          return next(authReq);
+        }
+        return next(req);
+      })
+    ).subscribe({
+      next: (val) => zone.run(() => observer.next(val)),
+      error: (err) => zone.run(() => observer.error(err)),
+      complete: () => zone.run(() => observer.complete())
+    });
+  });
 };
