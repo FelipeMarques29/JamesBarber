@@ -28,6 +28,7 @@ export interface ClienteLista {
   email: string;
   status: string;
   funcao: string | null;
+  is_admin?: boolean;
   jornada_inicio?: string;
   jornada_fim?: string;
   almoco_inicio?: string;

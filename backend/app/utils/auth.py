@@ -54,7 +54,8 @@ def obter_usuario_atual(decoded_token: dict = Depends(verificar_token)) -> dict:
 
 def requer_funcionario(usuario: dict = Depends(obter_usuario_atual)) -> dict:
     status_usuario = usuario.get("status")
-    if status_usuario not in ["funcionario", "admin"]:
+    is_admin = bool(usuario.get("is_admin", False))
+    if status_usuario not in ["funcionario", "admin"] and not is_admin:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Acesso negado: Requer privilégios de Funcionário ou Admin."
@@ -63,7 +64,8 @@ def requer_funcionario(usuario: dict = Depends(obter_usuario_atual)) -> dict:
 
 
 def requer_admin(usuario: dict = Depends(obter_usuario_atual)) -> dict:
-    if usuario.get("status") != "admin":
+    is_admin = bool(usuario.get("is_admin", False))
+    if usuario.get("status") != "admin" and not is_admin:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Acesso negado: Requer privilégios de Administrador."

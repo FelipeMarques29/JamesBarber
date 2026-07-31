@@ -19,6 +19,7 @@
   </div>
 
   <div class="metrics-grid">
+    @if (isAdmin) {
     <div class="metric-card">
       <div class="metric-icon"><i class="ti ti-users"></i></div>
       <div class="metric-info">
@@ -40,8 +41,25 @@
         <p>{{ admins.length }}</p>
       </div>
     </div>
+    }
+    <div class="metric-card">
+      <div class="metric-icon"><i class="ti ti-cash"></i></div>
+      <div class="metric-info">
+        <h3>{{ isAdmin ? 'Faturamento Geral' : 'Meu Faturamento' }}</h3>
+        <p>{{ carregandoFaturamento ? 'Carregando...' : (faturamentoResumo.total | currency:'BRL') }}</p>
+        <small>{{ faturamentoResumo.quantidade }} atendimentos concluídos</small>
+      </div>
+    </div>
   </div>
 
+  @if (!isAdmin) {
+  <div class="empty-state">
+    <i class="ti ti-cash"></i>
+    <p>Seu faturamento é exibido aqui com base nos atendimentos concluídos.</p>
+  </div>
+  }
+
+  @if (isAdmin) {
   <!-- Busca por cliente -->
   <div class="busca-wrap">
     <i class="ti ti-search busca-icon"></i>
@@ -78,10 +96,10 @@
         }
       </select>
       <button class="btn-acao btn-funcionario" (click)="promover(c, 'funcionario', funcaoSelect.value)">
-        → Funcionário
+        <i class="ti ti-user-plus"></i><span>Funcionário</span>
       </button>
       <button class="btn-acao btn-admin" (click)="promover(c, 'admin')">
-        → Admin
+        <i class="ti ti-shield"></i><span>Admin</span>
       </button>
     </div>
   </div>
@@ -141,10 +159,10 @@
                 }
               </select>
               <button class="btn-acao btn-funcionario" (click)="promover(c, 'funcionario', funcaoSelectTabela.value)">
-                Funcionário
+                <i class="ti ti-user-plus"></i><span>Funcionário</span>
               </button>
               <button class="btn-acao btn-admin" (click)="promover(c, 'admin')">
-                Admin
+                <i class="ti ti-shield"></i><span>Admin</span>
               </button>
             </td>
           </tr>
@@ -169,6 +187,7 @@
             <th>Nome</th>
             <th>Email</th>
             <th>Função</th>
+            <th>Admin</th>
             <th>Ações</th>
           </tr>
         </thead>
@@ -177,16 +196,29 @@
           <tr>
             <td>{{ f.nome }}</td>
             <td>{{ f.email }}</td>
-            <td><span class="badge funcao">{{ f.funcao }}</span></td>
+            <td>
+              <select class="select-funcao" #funcaoSelectFuncionario [value]="f.funcao ?? ''">
+                <option value="">Função</option>
+                @for (func of funcoes; track func) {
+                <option [value]="func">{{ func }}</option>
+                }
+              </select>
+            </td>
+            <td>
+              <label class="switch-label">
+                <input type="checkbox" [checked]="!!f.is_admin" #adminSwitchFuncionario>
+                <span class="switch-slider"></span>
+              </label>
+            </td>
             <td class="td-acoes">
               <button class="btn-acao btn-funcionario" (click)="abrirModalJornada(f)">
-                ⏱️ Jornada
+                <i class="ti ti-clock"></i><span>Jornada</span>
               </button>
               <button class="btn-acao btn-rebaixar" (click)="promover(f, 'cliente')">
-                Cliente
+                <i class="ti ti-user-minus"></i><span>Cliente</span>
               </button>
-              <button class="btn-acao btn-admin" (click)="promover(f, 'admin')">
-                Admin
+              <button class="btn-acao btn-primary" (click)="salvarPermissao(f, adminSwitchFuncionario.checked, funcaoSelectFuncionario.value)">
+                <i class="ti ti-device-floppy"></i><span>Salvar</span>
               </button>
             </td>
           </tr>
@@ -212,7 +244,7 @@
             <td>{{ a.email }}</td>
             <td class="td-acoes">
               <button class="btn-acao btn-rebaixar" (click)="promover(a, 'cliente')">
-                Cliente
+                <i class="ti ti-user-minus"></i><span>Cliente</span>
               </button>
               <select class="select-funcao" #funcaoSelectAdmin>
                 <option value="">Função Func.</option>
@@ -221,7 +253,7 @@
                 }
               </select>
               <button class="btn-acao btn-funcionario" (click)="promover(a, 'funcionario', funcaoSelectAdmin.value)">
-                Funcionário
+                <i class="ti ti-user-plus"></i><span>Funcionário</span>
               </button>
             </td>
           </tr>
@@ -266,6 +298,7 @@
       </div>
     </div>
   </div>
+  }
   }
 
 </section>

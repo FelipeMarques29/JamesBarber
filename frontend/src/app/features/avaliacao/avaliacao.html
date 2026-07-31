@@ -34,9 +34,19 @@
         <span class="rating-count">{{ reviews().length }} avaliações</span>
       </div>
 
-      <button type="button" class="btn-primary" (click)="abrirModal()">Deixar avaliação</button>
+      @if (carregando()) {
+        <span class="rating-count">Validando atendimentos...</span>
+      } @else {
+        <button type="button" class="btn-primary" (click)="abrirModal()" [disabled]="!podeAvaliar()">
+          {{ podeAvaliar() ? 'Deixar avaliação' : 'Aguardando atendimento' }}
+        </button>
+      }
     </div>
   </div>
+
+  @if (aviso()) {
+    <p class="rating-count" style="margin-top: 12px;">{{ aviso() }}</p>
+  }
 
   <div class="reviews-grid">
     @for (r of reviews(); track r.id; let i = $index) {

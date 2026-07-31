@@ -38,7 +38,7 @@ export const routes: Routes = [
   // exigem admin logado
   { path: 'admin-dados', component: AdminDados, canActivate: [adminGuard] },
   { path: 'faturamento', component: Faturamento, canActivate: [adminGuard] },
-  { path: 'dashboard', component: Dashboard, canActivate: [adminGuard] },
+  { path: 'dashboard', component: Dashboard, canActivate: [authGuard] },
 
   { path: '**', redirectTo: '' }
 ];

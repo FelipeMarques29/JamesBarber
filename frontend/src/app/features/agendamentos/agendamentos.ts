@@ -164,10 +164,23 @@ export class Agendamentos implements OnInit {
     this.agendamentoSelecionado.set(null);
   }
 
+  podeMarcarComoConcluido(ag: Agendamento): boolean {
+    if (!this.isAdmin()) return false;
+    if (ag.status === 'Concluído' || ag.status === 'Cancelado') return false;
+    const hoje = new Date().toISOString().split('T')[0];
+    const diaAgendamento = new Date(ag.data_hora).toISOString().split('T')[0];
+    return diaAgendamento === hoje;
+  }
+
   marcarComoConcluido(ag: Agendamento): void {
+    if (!this.podeMarcarComoConcluido(ag)) {
+      alert('Só administradores podem concluir agendamentos do mesmo dia.');
+      return;
+    }
+
     this.agendamentoService.atualizar(ag.id, { status: 'Concluído' }).subscribe({
       next: () => this.fecharOpcoesAdmin(),
-      error: () => alert('Erro ao concluir agendamento.'),
+      error: (err) => alert(err?.error?.detail ?? 'Erro ao concluir agendamento.'),
     });
   }
 

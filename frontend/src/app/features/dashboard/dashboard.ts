@@ -1,7 +1,7 @@
 import { Component, inject, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-// import { RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { ApiService } from '@core/api-service';
 import { ClienteLista } from '@shared/models/cliente-model';
 
@@ -17,6 +17,7 @@ import { Navbar } from '@shared/components/navbar/navbar';
 export class Dashboard implements OnInit {
   private apiService = inject(ApiService);
   private cdr = inject(ChangeDetectorRef);
+  private router = inject(Router);
 
   clientes: ClienteLista[] = [];
   todosClientes: ClienteLista[] = [];
@@ -61,6 +62,10 @@ export class Dashboard implements OnInit {
   haMaisClientes: boolean = true;
 
   notificacao = { mostrar: false, mensagem: '', tipo: 'sucesso' };
+  isAdmin = false;
+  isFuncionario = false;
+  faturamentoResumo = { total: 0, quantidade: 0 };
+  carregandoFaturamento = false;
 
   mostrarNotificacao(mensagem: string, tipo: 'sucesso' | 'erro' = 'sucesso') {
     this.notificacao = { mostrar: true, mensagem, tipo };
@@ -73,25 +78,65 @@ export class Dashboard implements OnInit {
   }
 
   ngOnInit(): void {
-    this.carregarFuncionarios();
-    this.carregarAdmins();
-    this.carregarBarbeiros();
-    this.carregarBloqueios();
-    this.apiService.totalClientes().subscribe({
-      next: (res) => {
-        this.totalClientes = res.total;
-        this.cdr.detectChanges();
-      },
-      error: () => {
-        this.cdr.detectChanges();
-      }
-    });
+    this.isAdmin = this.apiService.hasRole('admin');
+    this.isFuncionario = this.apiService.hasRole('funcionario');
+
+    if (!this.isAdmin && !this.isFuncionario) {
+      this.router.navigate(['/home']);
+      return;
+    }
+
+    this.carregarResumoFaturamento();
+
+    if (this.isAdmin) {
+      this.carregarFuncionarios();
+      this.carregarAdmins();
+      this.carregarBarbeiros();
+      this.carregarBloqueios();
+      this.apiService.totalClientes().subscribe({
+        next: (res) => {
+          this.totalClientes = res.total;
+          this.cdr.detectChanges();
+        },
+        error: () => {
+          this.cdr.detectChanges();
+        }
+      });
+    }
   }
 
   carregarBarbeiros(): void {
     this.apiService.listarBarbeiros().subscribe({
       next: (res) => { this.barbeiros = res; this.cdr.detectChanges(); },
       error: () => { this.cdr.detectChanges(); }
+    });
+  }
+
+  carregarResumoFaturamento(): void {
+    const usuario = this.apiService.getUsuarioLogado();
+    if (!usuario) return;
+
+    this.carregandoFaturamento = true;
+    const filtros = this.isAdmin ? undefined : { barbeiro_id: usuario.id };
+
+    this.apiService.listarAgendamentos(filtros).subscribe({
+      next: (res) => {
+        const hoje = new Date().toISOString().split('T')[0];
+        const concluidos = res.filter((ag: any) => {
+          const diaAgendamento = new Date(ag.data_hora).toISOString().split('T')[0];
+          return ag.status === 'Concluído' && diaAgendamento === hoje;
+        });
+        this.faturamentoResumo = {
+          total: concluidos.reduce((s: number, ag: any) => s + (ag.valor_total ?? 0), 0),
+          quantidade: concluidos.length,
+        };
+        this.carregandoFaturamento = false;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.carregandoFaturamento = false;
+        this.cdr.detectChanges();
+      },
     });
   }
 
@@ -199,7 +244,7 @@ export class Dashboard implements OnInit {
     this.carregandoFuncionarios = true;
     this.apiService.listarFuncionarios().subscribe({
       next: (res) => {
-        this.funcionarios = res.filter(c => c.status === 'funcionario');
+        this.funcionarios = res.filter(c => c.status === 'funcionario' && !c.is_admin && (c.status as string) !== 'admin');
         this.carregandoFuncionarios = false;
         this.cdr.detectChanges();
       },
@@ -215,7 +260,7 @@ export class Dashboard implements OnInit {
     this.carregandoAdmins = true;
     this.apiService.listarAdmins().subscribe({
       next: (res) => {
-        this.admins = res.filter(c => c.status === 'admin');
+        this.admins = res.filter(c => c.is_admin === true || c.status === 'admin');
         this.carregandoAdmins = false;
         this.cdr.detectChanges();
       },
@@ -236,21 +281,33 @@ export class Dashboard implements OnInit {
     }
   }
 
-  promover(cliente: ClienteLista, status: 'funcionario' | 'admin' | 'cliente', funcao?: string): void {
-    if (status === 'funcionario' && !funcao) {
+  promover(cliente: ClienteLista, status: 'funcionario' | 'admin' | 'cliente', funcao?: string, isAdmin = status === 'admin'): void {
+    if (status !== 'cliente' && !funcao) {
       this.mostrarNotificacao('Selecione a função do funcionário.', 'erro');
       return;
     }
-    this.apiService.promoverCliente(cliente.id, status, funcao).subscribe({
+    this.apiService.promoverCliente(cliente.id, status, funcao, isAdmin).subscribe({
       next: () => {
-        this.mostrarNotificacao(`${cliente.nome} atualizado para ${status}!`);
+        this.mostrarNotificacao(`${cliente.nome} atualizado com sucesso!`);
         this.buscarCliente();
         this.carregarFuncionarios();
+        this.carregarAdmins();
+        this.carregarBarbeiros();
         this.todosClientes = [];
         this.mostrarTodosClientes = false;
       },
       error: (err) => this.mostrarNotificacao('Erro: ' + (err.error?.detail || 'Falha na operação'), 'erro'),
     });
+  }
+
+  salvarPermissao(usuario: ClienteLista, isAdminChecked: boolean, funcao: string): void {
+    if (!funcao) {
+      this.mostrarNotificacao('Selecione a função do funcionário.', 'erro');
+      return;
+    }
+
+    const status: 'funcionario' | 'admin' = isAdminChecked ? 'admin' : 'funcionario';
+    this.promover(usuario, status, funcao, isAdminChecked);
   }
 
   onSelectUsuarios(valor: string): void {
@@ -266,7 +323,7 @@ export class Dashboard implements OnInit {
       this.carregandoFuncionarios = true;
       this.apiService.listarFuncionarios().subscribe({
         next: (res) => {
-          this.funcionarios = res.filter(c => c.status === 'funcionario');
+          this.funcionarios = res.filter(c => c.status === 'funcionario' && !c.is_admin);
           this.carregandoFuncionarios = false;
           this.cdr.detectChanges();
         },
@@ -283,7 +340,7 @@ export class Dashboard implements OnInit {
       this.carregandoAdmins = true;
       this.apiService.listarAdmins().subscribe({
         next: (res) => {
-          this.admins = res.filter(c => c.status === 'admin');
+          this.admins = res.filter(c => c.is_admin === true || c.status === 'admin');
           this.carregandoAdmins = false;
           this.cdr.detectChanges();
         },

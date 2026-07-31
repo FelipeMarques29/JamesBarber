@@ -46,13 +46,15 @@ export class ApiService {
   hasRole(role: 'cliente' | 'funcionario' | 'admin'): boolean {
     const u = this.getUsuarioLogado();
     if (!u) return false;
-    if (role === 'funcionario') return u.status === 'funcionario' || u.status === 'admin';
+    const isAdmin = u.status === 'admin' || u.is_admin === true;
+    if (role === 'admin') return isAdmin;
+    if (role === 'funcionario') return u.status === 'funcionario' || isAdmin;
     return u.status === role;
   }
 
   isFuncionario(): boolean {
     const u = this.getUsuarioLogado();
-    return u?.status === 'funcionario' || u?.status === 'admin';
+    return u?.status === 'funcionario' || u?.status === 'admin' || u?.is_admin === true;
   }
 
 
@@ -88,7 +90,7 @@ export class ApiService {
 
   listarAdmins(): Observable<ClienteLista[]> {
     return this.http.get<ClienteLista[]>(`${this.API_URL}/clientes/`, {
-      params: { status: 'admin' }
+      params: { is_admin: true }
     });
   }
 
@@ -104,10 +106,12 @@ export class ApiService {
   promoverCliente(
     id: string,
     status: 'cliente' | 'funcionario' | 'admin',
-    funcao?: string
+    funcao?: string,
+    isAdmin?: boolean,
   ): Observable<any> {
     const params: any = { status };
     if (funcao) params['funcao'] = funcao;
+    if (typeof isAdmin === 'boolean') params['is_admin'] = isAdmin;
     return this.http.patch(`${this.API_URL}/clientes/${id}/promover`, null, { params});
   }
 

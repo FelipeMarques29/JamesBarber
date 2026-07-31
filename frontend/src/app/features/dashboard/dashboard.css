@@ -248,6 +248,31 @@
   cursor: pointer;
   background: transparent;
   transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+}
+
+.btn-acao i {
+  font-size: 0.95rem;
+}
+
+.btn-acao span {
+  display: inline-block;
+}
+
+.btn-acao.btn-primary,
+.btn-primary {
+  background-color: var(--gold);
+  color: var(--black);
+  border-color: var(--gold);
+}
+
+.btn-acao.btn-primary:hover,
+.btn-primary:hover {
+  background-color: var(--gold-light);
+  color: var(--black);
 }
 
 /* Botão Promover Funcionário */
@@ -258,6 +283,49 @@
 
 .btn-funcionario:hover {
   background-color: #248aff;
+}
+
+.switch-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.switch-label input {
+  appearance: none;
+  width: 44px;
+  height: 24px;
+  border-radius: 999px;
+  background: var(--border-color, #4b5563);
+  position: relative;
+  outline: none;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.switch-label input::before {
+  content: '';
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  left: 3px;
+  top: 3px;
+  border-radius: 50%;
+  background: white;
+  transition: transform 0.2s ease;
+}
+
+.switch-label input:checked {
+  background: var(--accent-gold, #d4af37);
+}
+
+.switch-label input:checked::before {
+  transform: translateX(20px);
+}
+
+.switch-slider {
+  display: none;
 }
 
 /* Botão Promover Admin */

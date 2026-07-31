@@ -14,6 +14,21 @@ router = APIRouter(prefix="/agendamentos", tags=["Agendamentos"])
 BRT = timezone(timedelta(hours=-3))
 
 
+def validar_conclusao_agendamento(usuario: dict, agendamento: dict, agora: datetime | None = None):
+    if usuario.get("status") != "admin":
+        raise HTTPException(status_code=403, detail="Apenas administradores podem concluir agendamentos.")
+
+    agora_dt = agora or datetime.now(timezone.utc)
+    data_agendamento = normalizar_data(agendamento.get("data_hora"))
+    data_agora = agora_dt.astimezone(timezone.utc).replace(tzinfo=None)
+
+    if data_agendamento is None:
+        raise HTTPException(status_code=400, detail="Data do agendamento inválida.")
+
+    if data_agendamento.date() != data_agora.date():
+        raise HTTPException(status_code=400, detail="Só é permitido concluir agendamentos do mesmo dia.")
+
+
 def normalizar_data(dt) -> datetime:
     if dt is None:
         return None
@@ -166,6 +181,9 @@ async def atualizar_agendamento(agendamento_id: str, dados: AgendamentoUpdate, u
 
     ag_atual = doc.to_dict()
     campos = dados.model_dump(exclude_none=True)
+
+    if campos.get("status") == "Concluído":
+        validar_conclusao_agendamento(user, ag_atual)
 
     if "data_hora" in campos:
         inicio_novo = normalizar_data(dados.data_hora)

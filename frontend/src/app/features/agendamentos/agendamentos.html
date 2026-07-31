@@ -197,10 +197,12 @@
 
     <div style="display: flex; flex-direction: column; gap: 10px;">
       @if (agendamentoSelecionado()!.status !== 'Concluído' && agendamentoSelecionado()!.status !== 'Cancelado') {
-        <button class="btn-salvar" style="width: 100%; background-color: #4ade80; color: #000;" 
-                (click)="marcarComoConcluido(agendamentoSelecionado()!)">
-          Marcar como Concluído
-        </button>
+        @if (podeMarcarComoConcluido(agendamentoSelecionado()!)) {
+          <button class="btn-salvar" style="width: 100%; background-color: #4ade80; color: #000;" 
+                  (click)="marcarComoConcluido(agendamentoSelecionado()!)">
+            Marcar como Concluído
+          </button>
+        }
         <button class="btn-salvar" style="width: 100%;" 
                 (click)="abrirModalReagendar(agendamentoSelecionado()!)">
           Reagendar

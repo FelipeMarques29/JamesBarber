@@ -48,6 +48,8 @@ async def login(dados: LoginRequest):
         doc = query[0]
         dados_usuario = doc.to_dict()
 
+        is_admin = bool(dados_usuario.get("is_admin", dados_usuario.get("status") == "admin"))
+
         return {
             "status": "ok",
             "tipo": dados_usuario.get("status"),
@@ -58,6 +60,7 @@ async def login(dados: LoginRequest):
                 "telefone": dados_usuario.get("telefone"),
                 "status": dados_usuario.get("status"),
                 "funcao": dados_usuario.get("funcao"),
+                "is_admin": is_admin,
                 # True quando a senha atual é temporária e precisa ser trocada.
                 "deve_trocar_senha": bool(dados_usuario.get("deve_trocar_senha", False)),
             }

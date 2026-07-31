@@ -12,6 +12,10 @@ from app.utils.cache import cache_barbeiros
 
 router = APIRouter(prefix="/clientes", tags=["Clientes"])
 
+
+def _is_admin_user(dados: dict) -> bool:
+    return bool(dados.get("is_admin", False)) or dados.get("status") == "admin"
+
 @router.get("/total")
 async def total_clientes(current_user: dict = Depends(obter_usuario_atual)):
     try:
@@ -56,6 +60,7 @@ async def listar_clientes(
     email: str | None = None,
     status: str | None = None,
     funcao: str | None = None,
+    is_admin: bool | None = None,
     limit: int = 50,
     start_after: str | None = None,
     current_user: dict = Depends(obter_usuario_atual),
@@ -90,6 +95,9 @@ async def listar_clientes(
         clientes = []
         for doc in query.stream():
             dados = doc.to_dict()
+            if is_admin is not None and not _is_admin_user(dados):
+                continue
+
             clientes.append({
                 "id": doc.id,
                 "nome": dados.get("nome"),
@@ -97,6 +105,7 @@ async def listar_clientes(
                 "telefone": dados.get("telefone", ""),
                 "status": dados.get("status"),
                 "funcao": dados.get("funcao"),
+                "is_admin": _is_admin_user(dados),
                 "jornada_inicio": dados.get("jornada_inicio"),
                 "jornada_fim": dados.get("jornada_fim"),
                 "almoco_inicio": dados.get("almoco_inicio"),
@@ -116,6 +125,7 @@ async def promover_cliente(
     cliente_id: str,
     status: Literal["cliente", "funcionario", "admin"],
     funcao: Literal["barbeiro", "limpeza", "balcao"] | None = None,
+    is_admin: bool | None = None,
     admin_user: dict = Depends(requer_admin)
 ):
     
@@ -126,12 +136,16 @@ async def promover_cliente(
         if not doc.exists:
             raise HTTPException(status_code=404, detail="Cliente não encontrado.")
         
-        if status == "funcionario" and not funcao:
+        if status in ["funcionario", "admin"] and not funcao:
             raise HTTPException(status_code=400, detail="Informe a função do funcionário.")
-        
+
+        novo_status = "cliente" if status == "cliente" else "funcionario"
+        novo_is_admin = bool(is_admin if is_admin is not None else status == "admin")
+
         ref.update({
-            "status": status,
-            "funcao": funcao if status == "funcionario" else None
+            "status": novo_status,
+            "funcao": funcao if status in ["funcionario", "admin"] else None,
+            "is_admin": novo_is_admin,
         })
         
         cache_barbeiros.clear()
