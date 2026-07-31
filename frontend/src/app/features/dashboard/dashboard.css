@@ -158,10 +158,9 @@
 .avatar-mini {
   width: 48px;
   height: 48px;
-  background-color: var(--dark3);
-  border: 1px solid var(--gold);
+  background-color: transparent;
+  border: none;
   color: var(--gold);
-  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -594,48 +593,66 @@
 
 /* METRICS GRID */
 .metrics-grid {
-  display: flex;
-  gap: 1.5rem;
-  width: 100%;
-  max-width: 800px;
-  margin-bottom: 3rem;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1rem;
+  width: min(100%, 1000px);
+  margin: 0 auto 3rem;
   z-index: 1;
+  align-items: stretch;
 }
 .metric-card {
-  flex: 1;
   background: rgba(30, 30, 30, 0.6);
   backdrop-filter: blur(10px);
   border: 1px solid var(--dark3);
   border-radius: 12px;
-  padding: 1.5rem;
+  padding: 1.25rem 1rem;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 1.5rem;
+  justify-content: center;
+  text-align: center;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  min-height: 140px;
 }
 .metric-icon {
-  width: 60px;
-  height: 60px;
-  background: rgba(201, 168, 76, 0.1);
+  width: auto;
+  height: auto;
+  background: transparent;
   color: var(--gold);
-  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 2rem;
+  font-size: 1.8rem;
+  margin-bottom: 0.75rem;
+}
+.metric-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
 }
 .metric-info h3 {
-  font-size: 0.9rem;
+  font-size: 0.82rem;
   color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.05rem;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.35rem;
+  text-align: center;
 }
 .metric-info p {
-  font-size: 2.2rem;
+  font-size: 1.8rem;
   font-weight: 700;
   color: var(--white);
-  line-height: 1;
+  line-height: 1.1;
+  margin: 0;
+}
+.metric-info small {
+  margin-top: 0.35rem;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  text-align: center;
 }
 @media (max-width: 600px) {
   .metrics-grid { flex-direction: column; }
@@ -645,6 +662,8 @@
 .busca-wrap {
   position: relative;
   align-items: center;
+  width: min(100%, 800px);
+  margin: 0 auto 3rem;
 }
 .busca-icon {
   font-size: 1.2rem;
@@ -676,7 +695,8 @@
   background: rgba(0, 0, 0, 0.2);
   border: 1px dashed var(--dark3);
   border-radius: 8px;
-  width: 100%;
+  width: min(100%, 800px);
+  margin: 0 auto 2rem;
 }
 .empty-state i {
   font-size: 3.5rem;
@@ -692,6 +712,7 @@
   padding: 0.5rem;
   border-radius: 8px;
   border: 1px solid var(--dark3);
+  width: 100%;
 }
 .tab-btn {
   flex: 1;
@@ -714,6 +735,23 @@
   background: var(--dark3);
   color: var(--white);
   box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+/* CONTAINERS */
+.usuario-card,
+.selects-wrap,
+.select-grupo,
+.admin-table {
+  width: min(100%, 800px);
+  margin: 0 auto;
+}
+
+.usuario-card {
+  margin-bottom: 1.5rem;
+}
+
+.admin-table {
+  max-width: 800px;
 }
 
 /* MODAL GRID */

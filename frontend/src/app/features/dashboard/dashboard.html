@@ -21,21 +21,21 @@
   <div class="metrics-grid">
     @if (isAdmin) {
     <div class="metric-card">
-      <div class="metric-icon"><i class="ti ti-users"></i></div>
+      <i class="ti ti-users metric-icon"></i>
       <div class="metric-info">
         <h3>Total de Clientes</h3>
         <p>{{ totalClientes }}</p>
       </div>
     </div>
     <div class="metric-card">
-      <div class="metric-icon"><i class="ti ti-user-check"></i></div>
+      <i class="ti ti-user-check metric-icon"></i>
       <div class="metric-info">
         <h3>Funcionários Ativos</h3>
         <p>{{ funcionarios.length }}</p>
       </div>
     </div>
     <div class="metric-card">
-      <div class="metric-icon"><i class="ti ti-shield"></i></div>
+      <i class="ti ti-shield metric-icon"></i>
       <div class="metric-info">
         <h3>Admins Ativos</h3>
         <p>{{ admins.length }}</p>
@@ -43,7 +43,7 @@
     </div>
     }
     <div class="metric-card">
-      <div class="metric-icon"><i class="ti ti-cash"></i></div>
+      <i class="ti ti-cash metric-icon"></i>
       <div class="metric-info">
         <h3>{{ isAdmin ? 'Faturamento Geral' : 'Meu Faturamento' }}</h3>
         <p>{{ carregandoFaturamento ? 'Carregando...' : (faturamentoResumo.total | currency:'BRL') }}</p>
