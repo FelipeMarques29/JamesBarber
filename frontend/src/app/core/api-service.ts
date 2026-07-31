@@ -94,7 +94,7 @@ export class ApiService {
 
   listarBarbeiros(): Observable<ClienteLista[]> {
     return this.http.get<ClienteLista[]>(`${this.API_URL}/clientes/`, {
-      params: { funcao: 'barbeiro' }
+      params: { funcao: 'barbeiro', status: 'funcionario' }
     });
   }
   //LISTA FUNCIONARIOS NO DASHBOARD
